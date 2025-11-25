@@ -62,6 +62,7 @@ mahoshojo_over = [2339,800]   #文本范围右下角位置
 
 
 
+import sys
 import random
 import time
 import keyboard
@@ -77,6 +78,18 @@ import win32process
 import psutil
 from text_fit_draw import draw_text_auto
 from image_fit_paste import paste_image_auto
+
+# ===== PyInstaller 资源路径处理函数 =====
+def get_resource_path(relative_path):
+    """获取资源文件的绝对路径，兼容开发环境和打包后的环境"""
+    try:
+        # PyInstaller 创建临时文件夹，路径存储在 _MEIPASS 中
+        base_path = sys._MEIPASS
+    except AttributeError:
+        # 开发环境中使用当前文件所在目录
+        base_path = os.path.dirname(os.path.abspath(__file__))
+    
+    return os.path.join(base_path, relative_path)
 
 i = -1
 value_1 = -1
@@ -215,8 +228,8 @@ def get_current_character():
     return character_list[current_character_index-1]
 
 def get_current_font():
-    # 返回完整的字体文件绝对路径
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), mahoshojo[get_current_character()]["font"])
+    # 使用 get_resource_path 获取字体文件路径
+    return get_resource_path(mahoshojo[get_current_character()]["font"])
 
 def get_current_emotion_count():
     return mahoshojo[get_current_character()]["emotion_count"]
@@ -228,8 +241,6 @@ def delate(folder_path, quality=85):
          
 
 def generate_and_save_images(character_name):
-    now_file = os.path.dirname(os.path.abspath(__file__))
-    
     # 获取当前角色的表情数量
     emotion_count = mahoshojo[character_name]["emotion_count"]
 
@@ -239,9 +250,9 @@ def generate_and_save_images(character_name):
     print("正在加载")
     for i in range(16):     
         for j in range(emotion_count):
-                # 使用绝对路径加载背景图片和角色图片
-            background_path = os.path.join(now_file, "background", f"c{i+1}.png")
-            overlay_path = os.path.join(now_file, character_name, f"{character_name} ({j+1}).png")
+            # 使用 get_resource_path 获取资源路径
+            background_path = get_resource_path(os.path.join("background", f"c{i+1}.png"))
+            overlay_path = get_resource_path(os.path.join(character_name, f"{character_name} ({j+1}).png"))
                 
             background = Image.open(background_path).convert("RGBA")
             overlay = Image.open(overlay_path).convert("RGBA")
@@ -250,8 +261,8 @@ def generate_and_save_images(character_name):
             result = background.copy()
             result.paste(overlay, (0, 134), overlay)
                 
-                # 使用绝对路径保存生成的图片
-            save_path = os.path.join(os.path.join(magic_cut_folder), f"{character_name} ({img_num}).jpg")
+            # 使用绝对路径保存生成的图片
+            save_path = os.path.join(magic_cut_folder, f"{character_name} ({img_num}).jpg")
             result.convert("RGB").save(save_path)
     print("加载完成")
 

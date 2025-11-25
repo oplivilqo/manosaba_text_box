@@ -4,6 +4,16 @@ from typing import Tuple, Union, Literal
 from PIL import Image, ImageDraw, ImageFont
 import os
 import re
+import sys
+
+# ===== PyInstaller 资源路径处理函数 =====
+def get_resource_path(relative_path):
+    """获取资源文件的绝对路径，兼容开发环境和打包后的环境"""
+    try:
+        base_path = sys._MEIPASS
+    except AttributeError:
+        base_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base_path, relative_path)
 
 try:
     from pilmoji import Pilmoji
@@ -301,7 +311,8 @@ def draw_text_auto(
             font_color = config["font_color"]
             font_size = config["font_size"]
         
-            font_path_char = os.path.join(os.path.dirname(os.path.abspath(__file__)), "font3.ttf")
+            # 使用 get_resource_path 获取字体文件路径
+            font_path_char = get_resource_path("font3.ttf")
             char_font = ImageFont.truetype(font_path_char, font_size)
             
             shadow_position = (position[0] + shadow_offset[0], position[1] + shadow_offset[1])
