@@ -38,7 +38,8 @@ Ctrl+Tab: 清除图片
 
 改动说明：
 默认启用窗口白名单，只在微信和QQ等聊天窗口前台时才响应热键，避免误触发
-
+支持系统自带的emoji
+使用Ctrl+G和Ctrl+H切换自动粘贴/发送功能（TIMemoji替代品）
 """
 )
 
@@ -279,7 +280,22 @@ def switch_character(new_index):
         
         return True
     return False
-
+#自动发送/粘贴
+AUTO_PASTE_IMAGE=True
+AUTO_SEND_IMAGE=True
+def switch_auto_paste():
+    global AUTO_PASTE_IMAGE,AUTO_SEND_IMAGE
+    AUTO_PASTE_IMAGE=not AUTO_PASTE_IMAGE
+    if(AUTO_PASTE_IMAGE==False):
+        AUTO_SEND_IMAGE=False
+    print(f"自动粘贴已切换为: {AUTO_PASTE_IMAGE}")
+def switch_auto_send():
+    global AUTO_PASTE_IMAGE,AUTO_SEND_IMAGE
+    if(AUTO_PASTE_IMAGE==False):
+        print("请先开启自动粘贴")
+        return
+    AUTO_SEND_IMAGE=not AUTO_SEND_IMAGE
+    print(f"自动发送已切换为: {AUTO_SEND_IMAGE}")
 # 显示当前角色信息
 def show_current_character():
     character_name = get_current_character()
@@ -561,7 +577,8 @@ def run_start_in_thread():
 # 按Ctrl+1 到 Ctrl+9: 切换角色1-9
 for i in range(1,10):
     keyboard.add_hotkey(f'ctrl+{i}', lambda idx=i: switch_character(idx))
-
+keyboard.add_hotkey('ctrl+g',switch_auto_paste)
+keyboard.add_hotkey('ctrl+h',switch_auto_send)
 # 角色10-13使用特殊快捷键
 keyboard.add_hotkey('ctrl+q', lambda: switch_character(10))   # 角色10
 keyboard.add_hotkey('ctrl+e', lambda: switch_character(11))  # 角色11
