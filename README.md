@@ -24,6 +24,8 @@
 
 4.支持系统通用的emoji（TIM由于会自动将输入的emoji变成图片，故暂不支持，QQ未测试）
 
+5.增加了方便的build脚本，生成方式：pyinstaller build_onefile.spec
+
 ## 功能特色
 
 🎨 多角色支持 - 内置14个角色，每个角色多个表情差分
