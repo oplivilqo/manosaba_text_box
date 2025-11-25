@@ -83,7 +83,7 @@ value_1 = -1
 expression = None
 
 #前台窗口白名单
-windowwhitelist=["TIM.exe","WeChat.exe","WeChatApp.exe","QQ.exe"]
+windowwhitelist=["TIM.exe","WeChat.exe","Weixin.exe","WeChatApp.exe","QQ.exe"]
 enablewhitelist=True
 # 角色配置字典
 mahoshojo = {

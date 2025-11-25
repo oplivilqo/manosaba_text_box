@@ -3,6 +3,14 @@ from io import BytesIO
 from typing import Tuple, Union, Literal
 from PIL import Image, ImageDraw, ImageFont
 import os
+import re
+
+try:
+    from pilmoji import Pilmoji
+    PILMOJI_AVAILABLE = True
+except ImportError:
+    PILMOJI_AVAILABLE = False
+    print("警告: pilmoji未安装，emoji将以黑白显示。安装方法: pip install pilmoji")
 
 Align = Literal["left", "center", "right"]
 VAlign = Literal["top", "middle", "bottom"]
@@ -31,6 +39,21 @@ def compress_image(image: Image.Image) -> Image.Image:
     
     return image.resize((new_width, new_height), Image.Resampling.LANCZOS)
 
+def is_emoji(char: str) -> bool:
+    """判断字符是否为emoji"""
+    code = ord(char)
+    # Emoji常见Unicode范围
+    return (
+        0x1F300 <= code <= 0x1F9FF or  # 常见表情符号
+        0x2600 <= code <= 0x27BF or    # 杂项符号
+        0x1F000 <= code <= 0x1F02F or  # 麻将牌等
+        0xFE00 <= code <= 0xFE0F or    # 变体选择器
+        0x1F200 <= code <= 0x1F251 or  # 方框符号
+        0x1F600 <= code <= 0x1F64F or  # 表情符号
+        0x1FA00 <= code <= 0x1FA6F or  # 扩展表情
+        0x2700 <= code <= 0x27BF       # 装饰符号
+    )
+
 def draw_text_auto(
     image_source: Union[str, Image.Image],
     top_left: Tuple[int, int],
@@ -50,6 +73,7 @@ def draw_text_auto(
     """
     在指定矩形内自适应字号绘制文本；
     中括号及括号内文字使用 bracket_color。
+    支持彩色emoji表情显示。
     """
 
     # --- 1. 打开图像 ---
@@ -58,8 +82,12 @@ def draw_text_auto(
     else:
         img = Image.open(image_source).convert("RGBA")
     
-    # 压缩底图
-    draw = ImageDraw.Draw(img)
+    # 创建Pilmoji对象用于彩色emoji
+    if PILMOJI_AVAILABLE:
+        pilmoji = Pilmoji(img)
+        draw = pilmoji  # 使用pilmoji替代draw
+    else:
+        draw = ImageDraw.Draw(img)
 
     if image_overlay is not None:
         if isinstance(image_overlay, Image.Image):
@@ -82,9 +110,10 @@ def draw_text_auto(
         except Exception:
             return ImageFont.load_default()
 
-    # --- 3. 文本包行 ---
+    # --- 3. 文本包行 (使用pilmoji的textsize) ---
     def wrap_lines(txt: str, font: ImageFont.FreeTypeFont, max_w: int) -> list[str]:
         lines: list[str] = []
+        
         for para in txt.splitlines() or [""]:
             has_space = (" " in para)
             units = para.split(" ") if has_space else list(para)
@@ -97,7 +126,14 @@ def draw_text_auto(
 
             for u in units:
                 trial = unit_join(buf, u)
-                w = draw.textlength(trial, font=font)
+                # 使用pilmoji计算宽度
+                if PILMOJI_AVAILABLE:
+                    w = pilmoji.getsize(trial, font=font)[0]
+                else:
+                    # 回退到普通draw
+                    temp_draw = ImageDraw.Draw(img)
+                    w = temp_draw.textlength(trial, font=font)
+                
                 if w <= max_w:
                     buf = trial
                 else:
@@ -106,7 +142,12 @@ def draw_text_auto(
                     if has_space and len(u) > 1:
                         tmp = ""
                         for ch in u:
-                            if draw.textlength(tmp + ch, font=font) <= max_w:
+                            if PILMOJI_AVAILABLE:
+                                tmp_w = pilmoji.getsize(tmp + ch, font=font)[0]
+                            else:
+                                temp_draw = ImageDraw.Draw(img)
+                                tmp_w = temp_draw.textlength(tmp + ch, font=font)
+                            if tmp_w <= max_w:
                                 tmp += ch
                             else:
                                 if tmp:
@@ -114,7 +155,12 @@ def draw_text_auto(
                                 tmp = ch
                         buf = tmp
                     else:
-                        if draw.textlength(u, font=font) <= max_w:
+                        if PILMOJI_AVAILABLE:
+                            u_w = pilmoji.getsize(u, font=font)[0]
+                        else:
+                            temp_draw = ImageDraw.Draw(img)
+                            u_w = temp_draw.textlength(u, font=font)
+                        if u_w <= max_w:
                             buf = u
                         else:
                             lines.append(u)
@@ -130,8 +176,14 @@ def draw_text_auto(
         ascent, descent = font.getmetrics()
         line_h = int((ascent + descent) * (1 + line_spacing))
         max_w = 0
+        
         for ln in lines:
-            max_w = max(max_w, int(draw.textlength(ln, font=font)))
+            if PILMOJI_AVAILABLE:
+                w = pilmoji.getsize(ln, font=font)[0]
+            else:
+                temp_draw = ImageDraw.Draw(img)
+                w = temp_draw.textlength(ln, font=font)
+            max_w = max(max_w, int(w))
         total_h = max(line_h * max(1, len(lines)), 1)
         return max_w, total_h, line_h
 
@@ -159,7 +211,7 @@ def draw_text_auto(
         font = _load_font(best_size)
 
     # --- 6. 解析着色片段 ---
-    def parse_color_segments(s: str,in_bracket: bool) -> Tuple[list[tuple[str, Tuple[int, int, int]]],bool]:
+    def parse_color_segments(s: str, in_bracket: bool) -> Tuple[list[tuple[str, Tuple[int, int, int]]], bool]:
         segs: list[tuple[str, Tuple[int, int, int]]] = []
         buf = ""
         for ch in s:
@@ -179,7 +231,7 @@ def draw_text_auto(
                 buf += ch
         if buf:
             segs.append((buf, bracket_color if in_bracket else color))
-        return segs,in_bracket
+        return segs, in_bracket
 
     # --- 7. 垂直对齐 ---
     if valign == "top":
@@ -189,23 +241,43 @@ def draw_text_auto(
     else:
         y_start = y2 - best_block_h
 
-    # --- 8. 绘制 ---
+    # --- 8. 绘制 (支持彩色emoji) ---
     y = y_start
     in_bracket = False
+    
     for ln in best_lines:
-        line_w = int(draw.textlength(ln, font=font))
+        # 计算行宽
+        if PILMOJI_AVAILABLE:
+            line_w = pilmoji.getsize(ln, font=font)[0]
+        else:
+            temp_draw = ImageDraw.Draw(img)
+            line_w = int(temp_draw.textlength(ln, font=font))
+        
         if align == "left":
             x = x1
         elif align == "center":
             x = x1 + (region_w - line_w) // 2
         else:
             x = x2 - line_w
-        segments,in_bracket = parse_color_segments(ln,in_bracket)
+        
+        segments, in_bracket = parse_color_segments(ln, in_bracket)
+        
         for seg_text, seg_color in segments:
             if seg_text:
-                draw.text((x+4, y+4), seg_text, font=font, fill=(0,0,0))# 文字阴影
-                draw.text((x, y), seg_text, font=font, fill=seg_color)
-                x += int(draw.textlength(seg_text, font=font))
+                if PILMOJI_AVAILABLE:
+                    # 使用pilmoji绘制彩色emoji
+                    # 先绘制阴影
+                    pilmoji.text((x+4, y+4), seg_text, font=font, fill=(0,0,0), emoji_position_offset=(0, 0))
+                    # 绘制主文字
+                    pilmoji.text((x, y), seg_text, font=font, fill=seg_color, emoji_position_offset=(0, 0))
+                    x += pilmoji.getsize(seg_text, font=font)[0]
+                else:
+                    # 回退到普通绘制
+                    temp_draw = ImageDraw.Draw(img)
+                    temp_draw.text((x+4, y+4), seg_text, font=font, fill=(0,0,0))
+                    temp_draw.text((x, y), seg_text, font=font, fill=seg_color)
+                    x += int(temp_draw.textlength(seg_text, font=font))
+        
         y += best_line_h
         if y - y_start > region_h:
             break
@@ -217,35 +289,29 @@ def draw_text_auto(
         print("Warning: overlay image is not exist.")
 
     # 自动在图片上写角色专属文字
-    # 如果提供了文字配置字典且角色名称存在，则使用对应的文字配置
     if text_configs_dict and role_name in text_configs_dict:
-        shadow_offset = (2, 2)  # 阴影偏移量
-        shadow_color = (0, 0, 0)  # 黑色阴影
+        # 重新创建普通draw对象用于绘制角色名字
+        regular_draw = ImageDraw.Draw(img)
+        shadow_offset = (2, 2)
+        shadow_color = (0, 0, 0)
         
         for config in text_configs_dict[role_name]:
-            text = config["text"]
+            char_text = config["text"]
             position = config["position"]
             font_color = config["font_color"]
             font_size = config["font_size"]
         
-            # 使用绝对路径加载字体文件
-            font_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "font3.ttf")
-            font = ImageFont.truetype(font_path, font_size)
+            font_path_char = os.path.join(os.path.dirname(os.path.abspath(__file__)), "font3.ttf")
+            char_font = ImageFont.truetype(font_path_char, font_size)
             
-            # 计算阴影位置
             shadow_position = (position[0] + shadow_offset[0], position[1] + shadow_offset[1])
             
-            # 先绘制阴影文字
-            draw.text(shadow_position, text, fill=shadow_color, font=font)
-            
-            # 再绘制主文字（覆盖在阴影上方）
-            draw.text(position, text, fill=font_color, font=font)
+            regular_draw.text(shadow_position, char_text, fill=shadow_color, font=char_font)
+            regular_draw.text(position, char_text, fill=font_color, font=char_font)
+    
     img = compress_image(img)
+    
     # --- 9. 输出 PNG ---
-    # img = img.convert('RGB')
-    # buf = BytesIO()
-    # img.save(buf, format="JPEG", quality=20)
-    # return buf.getvalue()
     buf = BytesIO()
     img.save(buf, format="png")
     return buf.getvalue()
