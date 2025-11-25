@@ -36,6 +36,8 @@ Ctrl+Tab: 清除图片
 按Tab可清除生成图片，降低占用空间，但清除图片后需重启才能正常使用
 感谢各位的支持
 
+改动说明：
+默认启用窗口白名单，只在微信和QQ等聊天窗口前台时才响应热键，避免误触发
 
 """
 )
@@ -70,7 +72,9 @@ import win32clipboard
 import os
 import shutil
 import threading
-
+import win32gui
+import win32process
+import psutil
 from text_fit_draw import draw_text_auto
 from image_fit_paste import paste_image_auto
 
@@ -78,6 +82,9 @@ i = -1
 value_1 = -1
 expression = None
 
+#前台窗口白名单
+windowwhitelist=["TIM.exe","WeChat.exe","WeChatApp.exe","QQ.exe"]
+enablewhitelist=True
 # 角色配置字典
 mahoshojo = {
     "ema": {"emotion_count": 8, "font": "font3.ttf"},     # 樱羽艾玛
@@ -374,6 +381,17 @@ def copy_png_bytes_to_clipboard(png_bytes: bytes):
     win32clipboard.SetClipboardData(win32clipboard.CF_DIB, bmp_data)
     win32clipboard.CloseClipboard()
 
+#判断窗口名
+def get_window_exe_name():
+    try:
+        hwnd=win32gui.GetForegroundWindow()
+        _,pid=win32process.GetWindowThreadProcessId(hwnd)
+        process=psutil.Process(pid)
+        exe_path=process.exe()
+        return os.path.basename(exe_path)
+    except Exception as e:
+        print(f"获取文件名时发生错误：{e}")
+        return None
 
 def cut_all_and_get_text() -> str:
     """
@@ -516,6 +534,10 @@ def Start():
 
 
 def run_start_in_thread():
+    if enablewhitelist and get_window_exe_name() not in windowwhitelist:
+        print("当前窗口不在白名单内")
+        keyboard.send(HOTKEY)
+        return
     # 1. 在主线程（keyboard线程）中安全地剪切文本
     text = cut_all_and_get_text()
     
