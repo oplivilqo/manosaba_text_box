@@ -41,7 +41,8 @@ def paste_image_auto(
         img = image_source.copy()
     else:
         img = Image.open(image_source).convert("RGBA")
-
+    # 压缩底图
+    draw = ImageDraw.Draw(img)
     if image_overlay is not None:
         if isinstance(image_overlay, Image.Image):
             img_overlay = image_overlay.copy()
@@ -112,6 +113,30 @@ def paste_image_auto(
         img.paste(img_overlay, (0, 0), img_overlay)
     elif image_overlay is not None and img_overlay is None:
         print("Warning: overlay image is not exist.")
+    # 自动在图片上写角色专属文字
+    # 如果提供了文字配置字典且角色名称存在，则使用对应的文字配置
+    if text_configs_dict and role_name in text_configs_dict:
+        shadow_offset = (2, 2)  # 阴影偏移量
+        shadow_color = (0, 0, 0)  # 黑色阴影
+        
+        for config in text_configs_dict[role_name]:
+            text = config["text"]
+            position = config["position"]
+            font_color = config["font_color"]
+            font_size = config["font_size"]
+        
+            # 使用绝对路径加载字体文件
+            font_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "font3.ttf")
+            font = ImageFont.truetype(font_path, font_size)
+            
+            # 计算阴影位置
+            shadow_position = (position[0] + shadow_offset[0], position[1] + shadow_offset[1])
+            
+            # 先绘制阴影文字
+            draw.text(shadow_position, text, fill=shadow_color, font=font)
+            
+            # 再绘制主文字（覆盖在阴影上方）
+            draw.text(position, text, fill=font_color, font=font)
 
     # 输出 PNG bytes
     buf = BytesIO()
