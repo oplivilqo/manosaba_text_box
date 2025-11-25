@@ -69,6 +69,7 @@ from PIL import Image,ImageDraw,ImageFont
 import win32clipboard
 import os
 import shutil
+import threading
 
 from text_fit_draw import draw_text_auto
 from image_fit_paste import paste_image_auto
@@ -325,19 +326,19 @@ def get_random_value():
 
 HOTKEY= "enter"
 
-# 全选快捷键, 此按键并不会监听, 而是会作为模拟输入
+# 全选快捷键, 此按键并不会监听,  而是会作为模拟输入
 # 此值为字符串, 代表热键的键名, 格式同 HOTKEY
 SELECT_ALL_HOTKEY= "ctrl+a"
 
-# 剪切快捷键, 此按键并不会监听, 而是会作为模拟输入
+# 剪切快捷键, 此按键并不会监听,  而是会作为模拟输入
 # 此值为字符串, 代表热键的键名, 格式同 HOTKEY
 CUT_HOTKEY= "ctrl+x"
 
-# 黏贴快捷键, 此按键并不会监听, 而是会作为模拟输入
+# 黏贴快捷键, 此按键并不会监听,  而是会作为模拟输入
 # 此值为字符串, 代表热键的键名, 格式同 HOTKEY
 PASTE_HOTKEY= "ctrl+v"
 
-# 发送消息快捷键, 此按键并不会监听, 而是会作为模拟输入
+# 发送消息快捷键, 此按键并不会监听,  而是会作为模拟输入
 # 此值为字符串, 代表热键的键名, 格式同 HOTKEY
 SEND_HOTKEY= "enter"
 
@@ -421,6 +422,21 @@ def try_get_image() -> Image.Image | None:
             pass
     return None
 
+def perform_keyboard_actions(png_bytes):
+    """在主线程中执行所有键盘操作"""
+    if png_bytes is None:
+        print("Generate image failed!")
+        return
+    
+    copy_png_bytes_to_clipboard(png_bytes)
+    
+    if AUTO_PASTE_IMAGE:
+        # 使用 call_later 确保 send 在 keyboard 自己的线程中运行
+        keyboard.call_later(lambda: keyboard.send(PASTE_HOTKEY), delay=0.1)
+
+        if AUTO_SEND_IMAGE:
+            keyboard.call_later(lambda: keyboard.send(SEND_HOTKEY), delay=0.4) # 增加延迟以确保粘贴完成
+
 def Start():
     print("Start generate...")
     
@@ -437,11 +453,14 @@ def Start():
 # 文本框右下角坐标 (x, y), 同时适用于图片框
 # 此值为一个二元组, 例如 (100, 150), 单位像素, 图片的左上角记为 (0, 0)
     IMAGE_BOX_BOTTOMRIGHT= (mahoshojo_over[0], mahoshojo_over[1])
-    text=cut_all_and_get_text()
+    
+    text = pyperclip.paste() # 暂时从剪贴板获取，而不是模拟按键
     image=try_get_image()
 
     if text == "" and image is None:
         print("no text or image")
+        # 即使没有文本/图像，也调用回调以确保线程安全
+        keyboard.call_later(perform_keyboard_actions, args=[None])
         return
     
     png_bytes=None
@@ -465,6 +484,7 @@ def Start():
                 )
         except Exception as e:
             print("Generate image failed:", e)
+            keyboard.call_later(perform_keyboard_actions, args=[None])
             return
     
     elif text != "":
@@ -488,21 +508,21 @@ def Start():
 
         except Exception as e:
             print("Generate image failed:", e)
+            keyboard.call_later(perform_keyboard_actions, args=[None])
             return
         
-    if png_bytes is None:
-        print("Generate image failed!")
-        return
-    
-    copy_png_bytes_to_clipboard(png_bytes)
-    
-    if AUTO_PASTE_IMAGE:
-        keyboard.send(PASTE_HOTKEY)
+    # 将 png_bytes 传递给主线程的 perform_keyboard_actions
+    keyboard.call_later(perform_keyboard_actions, args=[png_bytes])
 
-        time.sleep(0.3)
 
-        if AUTO_SEND_IMAGE:
-            keyboard.send(SEND_HOTKEY)
+def run_start_in_thread():
+    # 1. 在主线程（keyboard线程）中安全地剪切文本
+    text = cut_all_and_get_text()
+    
+    # 2. 在后台线程中运行耗时的图像处理
+    # 将获取的文本作为参数传递给 Start 函数（需要修改Start函数以接受它）
+    # 但为了简化，我们依赖于剪贴板，因为 cut_all_and_get_text 已经更新了它
+    threading.Thread(target=Start).start()
 
 # 角色切换快捷键绑定
 # 按Ctrl+1 到 Ctrl+9: 切换角色1-9
@@ -521,7 +541,7 @@ for i in range(1,10):
     keyboard.add_hotkey(f'alt+{i}', lambda idx=i: get_expression(idx))
 
 # 绑定 Ctrl+Alt+H 作为全局热键
-ok=keyboard.add_hotkey(HOTKEY,Start, suppress=BLOCK_HOTKEY or HOTKEY==SEND_HOTKEY)
+ok=keyboard.add_hotkey(HOTKEY,run_start_in_thread, suppress=BLOCK_HOTKEY or HOTKEY==SEND_HOTKEY)
 
 # 绑定Ctrl+0显示当前角色
 keyboard.add_hotkey('ctrl+0', show_current_character)
