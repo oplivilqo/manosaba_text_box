@@ -1,2 +1,4 @@
 .vs/
-_pycache_/
+__pycache__/
+dist/
+build/
