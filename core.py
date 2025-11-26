@@ -212,7 +212,7 @@ def get_random_expression(character_name,last_value=-1,expression=-1):
     return os.path.join(get_magic_cut_folder(), f"{character_name} ({(expression - 1) * 16 + random.randint(1,16)}).jpg"),expression
 
 #图片生成
-def generate_image(text,content_image,role_name,font_path,last_value=-1,expression=-1):
+def generate_image(text,content_image,role_name,font_path='font3.ttf',last_value=-1,expression=-1):
     if not text and content_image is None:
         print("没有文本/图像")
         return None, expression
