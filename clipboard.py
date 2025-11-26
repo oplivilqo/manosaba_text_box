@@ -57,7 +57,7 @@ def try_get_image() -> Image.Image | None:
     return None
 
 #将文本剪切进剪贴板
-def cut_all_and_get_text(select_hotkey: str = 'ctrl+a', cut_hotkey: str = 'ctrl+x', delay: float = 0.2) -> tuple:
+def cut_all_and_get_text(select_hotkey: str = 'ctrl+a', cut_hotkey: str = 'ctrl+x', delay: float = 0.08) -> tuple:
     # 备份原剪贴板
     try:
         old_clip = pyperclip.paste()

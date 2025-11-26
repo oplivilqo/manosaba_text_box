@@ -5,6 +5,9 @@ from PIL import Image, ImageDraw, ImageFont
 import os
 import sys
 
+# 字体缓存
+_font_cache = {}
+
 # ===== PyInstaller 资源路径处理函数 =====
 def get_resource_path(relative_path):
     """获取资源文件的绝对路径，兼容开发环境和打包后的环境"""
@@ -16,6 +19,16 @@ def get_resource_path(relative_path):
 
 Align = Literal["left", "center", "right"]
 VAlign = Literal["top", "middle", "bottom"]
+
+#缓存字体
+def _load_font_cached(font_path: str, size: int) -> ImageFont.FreeTypeFont:
+    cache_key = f"{font_path}_{size}"
+    if cache_key not in _font_cache:
+        if font_path and os.path.exists(font_path):
+            _font_cache[cache_key] = ImageFont.truetype(font_path, size=size)
+        else:
+            _font_cache[cache_key] = ImageFont.load_default()
+    return _font_cache[cache_key]
 
 def paste_image_auto(
     image_source: Union[str, Image.Image],
@@ -51,8 +64,10 @@ def paste_image_auto(
         img = image_source.copy()
     else:
         img = Image.open(image_source).convert("RGBA")
-    # 压缩底图
+    
+    # 只创建一次draw对象
     draw = ImageDraw.Draw(img)
+    
     if image_overlay is not None:
         if isinstance(image_overlay, Image.Image):
             img_overlay = image_overlay.copy()
@@ -123,21 +138,25 @@ def paste_image_auto(
         img.paste(img_overlay, (0, 0), img_overlay)
     elif image_overlay is not None and img_overlay is None:
         print("Warning: overlay image is not exist.")
-    # 自动在图片上写角色专属文字
-    # 如果提供了文字配置字典且角色名称存在，则使用对应的文字配置
+    
+    # 自动在图片上写角色专属文字（优化：使用缓存的字体，跳过空文本）
     if text_configs_dict and role_name in text_configs_dict:
         shadow_offset = (2, 2)  # 阴影偏移量
         shadow_color = (0, 0, 0)  # 黑色阴影
         
+        # 使用 get_resource_path 获取字体文件路径（只获取一次）
+        font_path = get_resource_path("font3.ttf")
+        
         for config in text_configs_dict[role_name]:
             text = config["text"]
+            if not text:  # 跳过空文本
+                continue
             position = config["position"]
             font_color = config["font_color"]
             font_size = config["font_size"]
         
-            # 使用 get_resource_path 获取字体文件路径
-            font_path = get_resource_path("font3.ttf")
-            font = ImageFont.truetype(font_path, font_size)
+            # 使用缓存的字体
+            font = _load_font_cached(font_path, font_size)
             
             # 计算阴影位置
             shadow_position = (position[0] + shadow_offset[0], position[1] + shadow_offset[1])

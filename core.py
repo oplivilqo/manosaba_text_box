@@ -11,6 +11,10 @@ from image_fit_paste import paste_image_auto
 
 logger = logging.getLogger(__name__)
 
+# 图片缓存字典 - 存储已加载的图片
+_image_cache = {}
+_cache_enabled = True
+
 #全局变量区
 # 角色配置字典
 mahoshojo = {
@@ -126,7 +130,6 @@ mahoshojo_over = [2339,800]   #文本范围右下角位置
 
 
 
-
 #函数区
 #获取绝对路径
 def get_resource_path(related_path):
@@ -150,6 +153,36 @@ def get_magic_cut_folder():
     # 创建"魔裁"文件夹（如果不存在）
     os.makedirs(magic_cut_folder, exist_ok=True)
     return magic_cut_folder
+
+#启用/禁用缓存（等待后续加到gui里）
+def set_cache_enabled(enabled: bool):
+    global _cache_enabled
+    _cache_enabled = enabled
+    if not enabled:
+        clear_image_cache()
+
+#清空图片缓存
+def clear_image_cache():
+    global _image_cache
+    _image_cache.clear()
+    logger.info("图片缓存已清空")
+
+#从缓存或磁盘加载图片
+def load_image_cached(image_path: str) -> Image.Image:
+    if not _cache_enabled:
+        return Image.open(image_path).convert("RGBA")
+    
+    if image_path not in _image_cache:
+        try:
+            img = Image.open(image_path).convert("RGBA")
+            _image_cache[image_path] = img
+            logger.debug(f"图片已缓存: {os.path.basename(image_path)}")
+        except Exception as e:
+            logger.exception(f"加载图片失败 {image_path}: {e}")
+            raise
+    
+    # 返回副本
+    return _image_cache[image_path].copy()
 
 #预处理资源文件并保存到文件夹（新增了回传功能~）
 def prepare_resources(callback=None):
@@ -214,6 +247,31 @@ def prepare_resources(callback=None):
         _cb(f"预处理完毕：{character_name}")
         logger.info("预处理完毕：%s", character_name)
 
+    #预热缓存
+    _cb("正在预热图片缓存...")
+    logger.info("开始预热图片缓存")
+    preheat_cache()
+    _cb("缓存预热完成")
+    logger.info("缓存预热完成")
+
+def preheat_cache():
+    if not _cache_enabled:
+        return
+    
+    magic_cut_folder = get_magic_cut_folder()
+    # 只预加载每个角色的前几张图片，避免占用过多内存
+    for character_name in mahoshojo.keys():
+        emotion_count = mahoshojo[character_name]["emotion_count"]
+        # 预加载每个表情的第一张（共emotion_count张）
+        for j in range(min(emotion_count, 3)):  # 限制预加载数量
+            img_num = j * 16 + 1
+            image_path = os.path.join(magic_cut_folder, f"{character_name} ({img_num}).jpg")
+            if os.path.exists(image_path):
+                try:
+                    load_image_cached(image_path)
+                except Exception:
+                    logger.exception(f"预热缓存失败: {image_path}")
+
 #不重复的随机表情生成
 def get_random_expression(character_name,last_value=-1,expression=-1):
     if character_name not in mahoshojo:
@@ -244,18 +302,20 @@ def generate_image(text,content_image,role_name,font_path='font3.ttf',last_value
         return None, expression
     png_bytes=None
     address, expression = get_random_expression(role_name,last_value,expression)
+    
     # 文本框左上角坐标 (x, y), 同时适用于图片框
-# 此值为一个二元组, 例如 (100, 150), 单位像素, 图片的左上角记为 (0, 0)
     TEXT_BOX_TOPLEFT= (mahoshojo_postion[0], mahoshojo_postion[1])
-# 文本框右下角坐标 (x, y), 同时适用于图片框
-# 此值为一个二元组, 例如 (100, 150), 单位像素, 图片的左上角记为 (0, 0)
+    # 文本框右下角坐标 (x, y), 同时适用于图片框
     IMAGE_BOX_BOTTOMRIGHT= (mahoshojo_over[0], mahoshojo_over[1])
+    
     #处理图片
     if content_image is not None:
         try:
             logger.info("检测到图片")
+            # 使用缓存加载
+            base_image = load_image_cached(address)
             png_bytes = paste_image_auto(
-                image_source=address,
+                image_source=base_image,  # 直接传入Image对象
                 image_overlay=None,
                 top_left=TEXT_BOX_TOPLEFT,
                 bottom_right=IMAGE_BOX_BOTTOMRIGHT,
@@ -274,8 +334,10 @@ def generate_image(text,content_image,role_name,font_path='font3.ttf',last_value
     elif text:
         try:
             logger.info('检测到文本：'+text)
+            # 使用缓存加载
+            base_image = load_image_cached(address)
             png_bytes = draw_text_auto(
-                image_source=address,
+                image_source=base_image,  # 直接传入Image对象
                 image_overlay=None,
                 top_left=TEXT_BOX_TOPLEFT,
                 bottom_right=IMAGE_BOX_BOTTOMRIGHT,

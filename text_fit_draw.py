@@ -6,6 +6,9 @@ import os
 import re
 import sys
 
+# 字体缓存
+_font_cache = {}
+
 # ===== PyInstaller 资源路径处理函数 =====
 def get_resource_path(relative_path):
     """获取资源文件的绝对路径，兼容开发环境和打包后的环境"""
@@ -33,8 +36,13 @@ IMAGE_SETTINGS = {
 }
 
 def compress_image(image: Image.Image) -> Image.Image:
-    """压缩图像大小"""
+    """压缩图像大小 - 优化版本，只在需要时才压缩"""
     width, height = image.size
+    
+    # 如果图片已经很小，不压缩
+    if width <= IMAGE_SETTINGS["max_width"] and height <= IMAGE_SETTINGS["max_height"]:
+        return image
+    
     new_width = int(width * IMAGE_SETTINGS["resize_ratio"])
     new_height = int(height * IMAGE_SETTINGS["resize_ratio"])
     
@@ -47,7 +55,8 @@ def compress_image(image: Image.Image) -> Image.Image:
         ratio = IMAGE_SETTINGS["max_height"] / new_height
         new_height, new_width = IMAGE_SETTINGS["max_height"], int(new_width * ratio)
     
-    return image.resize((new_width, new_height), Image.Resampling.LANCZOS)
+    # 使用更快的BILINEAR插值（质量略降但速度更快）
+    return image.resize((new_width, new_height), Image.Resampling.BILINEAR)
 
 def is_emoji(char: str) -> bool:
     """判断字符是否为emoji"""
@@ -63,6 +72,19 @@ def is_emoji(char: str) -> bool:
         0x1FA00 <= code <= 0x1FA6F or  # 扩展表情
         0x2700 <= code <= 0x27BF       # 装饰符号
     )
+
+#缓存字体
+def _load_font_cached(font_path: str, size: int) -> ImageFont.FreeTypeFont:
+    cache_key = f"{font_path}_{size}"
+    if cache_key not in _font_cache:
+        if font_path and os.path.exists(font_path):
+            _font_cache[cache_key] = ImageFont.truetype(font_path, size=size)
+        else:
+            try:
+                _font_cache[cache_key] = ImageFont.truetype("DejaVuSans.ttf", size=size)
+            except Exception:
+                _font_cache[cache_key] = ImageFont.load_default()
+    return _font_cache[cache_key]
 
 def draw_text_auto(
     image_source: Union[str, Image.Image],
@@ -113,12 +135,7 @@ def draw_text_auto(
 
     # --- 2. 字体加载 ---
     def _load_font(size: int) -> ImageFont.FreeTypeFont:
-        if font_path and os.path.exists(font_path):
-            return ImageFont.truetype(font_path, size=size)
-        try:
-            return ImageFont.truetype("DejaVuSans.ttf", size=size)
-        except Exception:
-            return ImageFont.load_default()
+        return _load_font_cached(font_path, size)
 
     # --- 3. 文本包行 (使用pilmoji的textsize) ---
     def wrap_lines(txt: str, font: ImageFont.FreeTypeFont, max_w: int) -> list[str]:

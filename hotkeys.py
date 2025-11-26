@@ -29,7 +29,7 @@ class AppState:
         self.enable_whitelist = True
         self.window_whitelist = DEFAULT_WINDOW_WHITELIST
         self.busy = False
-        self.delay = 0.1
+        self.delay = 0.08
         #热键
         self.paste_hotkey = 'ctrl+v'
         self.send_hotkey = 'enter'
@@ -60,6 +60,8 @@ def _clear_magic_cut_folder():
                 os.remove(entry.path)
             except Exception:
                 logger.exception("删除失败： %s", entry.path)
+    # 清除缓存文件夹后，也清除内存缓存
+    core.clear_image_cache()
 
 #统一处理剪贴板操作
 def _perform_keyboard_actions(png_bytes, state: AppState):
@@ -74,10 +76,9 @@ def _perform_keyboard_actions(png_bytes, state: AppState):
         return
 
     if state.auto_paste:
-        # 给系统一点时间
-        keyboard.call_later(lambda: keyboard.send(state.paste_hotkey), delay=0.12)
+        keyboard.call_later(lambda: keyboard.send(state.paste_hotkey), delay=0.08)
         if state.auto_send:
-            keyboard.call_later(lambda: keyboard.send(state.send_hotkey), delay=0.35)
+            keyboard.call_later(lambda: keyboard.send(state.send_hotkey), delay=0.25)
 
 #进行图片生成和发送的工作线程
 def _worker_generate_and_send(text: str, content_image, state: AppState):
