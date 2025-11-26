@@ -23,7 +23,7 @@ selected_image = None  # 保存剪贴板里的图片
 
 # Tk 主窗口
 root = tk.Tk()
-root.title("魔裁 GUI")
+root.title("魔裁，启动！！")
 
 # 控件占位
 role_var = None
@@ -47,7 +47,7 @@ except Exception:
         RESAMPLE = 1
 
 
-#预处理窗口 这是我让ai加的一段预处理窗口，不过貌似没办法显示出来
+#预处理窗口
 class PreloadWindow(tk.Toplevel):
     def __init__(self, parent, title='资源预生成'):
         super().__init__(parent)
@@ -134,7 +134,7 @@ class PreloadWindow(tk.Toplevel):
             self.lbl.config(text='预处理完成，窗口即将关闭')
         except Exception:
             pass
-        self.after(800, self._close)
+        self.after(150, self._close)
 
     def _close(self):
         try:
@@ -371,11 +371,25 @@ def on_close():
 
 #在预处理完成前不显示主窗口
 if __name__ == '__main__':
-    root.withdraw()
+ #   root.withdraw()
     preload = PreloadWindow(root)
     preload.start_prepare()
-    #阻塞
-    root.wait_window(preload)
+    # 等待 preload 窗口关闭，同时处理 Tk 事件以保证窗口可见和可更新
+    try:
+        import time as _time
+        while True:
+            # 如果 preload 已被销毁则退出循环
+            if not preload.winfo_exists():
+                break
+            # 处理事件，保持窗口响应
+            root.update()
+            _time.sleep(0.05)
+    except Exception:
+        # 兜底，确保不会无限阻塞
+        try:
+            root.wait_window(preload)
+        except Exception:
+            pass
     #重新显示
     root.deiconify()
     build_ui()

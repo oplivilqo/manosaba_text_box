@@ -80,10 +80,10 @@ def _perform_keyboard_actions(png_bytes, state: AppState):
             keyboard.call_later(lambda: keyboard.send(state.send_hotkey), delay=0.35)
 
 #进行图片生成和发送的工作线程
-def _worker_generate_and_send(text: str, state: AppState):
+def _worker_generate_and_send(text: str, content_image, state: AppState):
     try:
         font_path = core.get_resource_path(core.mahoshojo[state.current_role]["font"]) if state.current_role in core.mahoshojo else None
-        png_bytes, expr = core.generate_image(text=text, content_image=None, role_name=state.current_role, font_path=font_path, last_value=state.last_expression, expression=-1)
+        png_bytes, expr = core.generate_image(text=text, content_image=content_image, role_name=state.current_role, font_path=font_path, last_value=state.last_expression, expression=-1)
         # 更新状态
         if expr is not None:
             state.last_expression = expr
@@ -110,13 +110,14 @@ def _on_enter_trigger(state: AppState):
         cut_k = getattr(state, 'cut_hotkey', 'ctrl+x')
         delay = getattr(state, 'delay', 0.2)
         text, old_clip = clipboard.cut_all_and_get_text(select_k, cut_k, delay)
+        content_image = clipboard.try_get_image()
     except Exception:
         logger.exception("剪切失败")
         keyboard.send('enter')
         return
     #启动后台生成
     state.busy = True
-    t = threading.Thread(target=_worker_generate_and_send, args=(text, state), daemon=True)
+    t = threading.Thread(target=_worker_generate_and_send, args=(text, content_image, state), daemon=True)
     t.start()
 
 #用于同步切换角色快捷键和下拉栏的函数
