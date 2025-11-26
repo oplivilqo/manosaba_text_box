@@ -28,9 +28,13 @@
 
 6.增加了切换自动发送/粘贴功能，详情见控制台
 
-7.重构了main.py，完善了安全性，把main.py中的功能拆分到了多个模块中（clipboard,hotkeys,core）
+7.完善了安全性（指try except），把main.py中的功能拆分到了多个模块中（clipboard,hotkeys,core），未改动main.py
 
 8.用tkinter实现了GUI，详见gui.py，现在main.py不再维护
+
+9.把原版每一次切换自动预加载改为在程序打开时自动预加载所有图片
+
+10.把所有print全改成了logger
 
 ## 功能特色
 
@@ -133,6 +137,7 @@
 <div align="right">
   
 ### 以上. 柊回文————2025.11.15
+
 
 
 
