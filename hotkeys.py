@@ -83,7 +83,8 @@ def _perform_keyboard_actions(png_bytes, state: AppState):
 def _worker_generate_and_send(text: str, content_image, state: AppState):
     try:
         font_path = core.get_resource_path(core.mahoshojo[state.current_role]["font"]) if state.current_role in core.mahoshojo else None
-        png_bytes, expr = core.generate_image(text=text, content_image=content_image, role_name=state.current_role, font_path=font_path, last_value=state.last_expression, expression=-1)
+        # 使用 state.last_expression 作为 expression 参数，这样热键生成也会使用 GUI 设置的表情
+        png_bytes, expr = core.generate_image(text=text, content_image=content_image, role_name=state.current_role, font_path=font_path, last_value=-1, expression=state.last_expression)
         # 更新状态
         if expr is not None:
             state.last_expression = expr

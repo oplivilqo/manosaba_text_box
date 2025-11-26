@@ -163,6 +163,29 @@ def build_ui():
     cmb_role = ttk.Combobox(frm_top, values=roles, textvariable=role_var, state='readonly')
     cmb_role.pack(side='left', padx=(4, 8))
 
+    # 表情选择标签
+    ttk.Label(frm_top, text='表情:').pack(side='left')
+    # 表情下拉框（动态更新选项）
+    global expression_var, cmb_expression
+    expression_var = tk.StringVar(value='随机')
+    cmb_expression = ttk.Combobox(frm_top, textvariable=expression_var, state='readonly', width=8)
+    cmb_expression.pack(side='left', padx=(4, 8))
+    
+    # 初始化表情选项
+    def update_expression_options(role_name):
+        """根据角色更新表情选择器"""
+        try:
+            emotion_count = core.mahoshojo[role_name]['emotion_count']
+            options = ['随机'] + [str(i) for i in range(1, emotion_count + 1)]
+            cmb_expression['values'] = options
+            # 重置为随机
+            expression_var.set('随机')
+        except Exception:
+            logger.exception('更新表情选项失败')
+    
+    # 初始设置表情选项
+    update_expression_options(state.current_role)
+
     # 热键启用复选框
     hotkey_var = tk.BooleanVar(value=False)
     chk_hotkeys = ttk.Checkbutton(frm_top, text='启用热键', variable=hotkey_var, command=lambda: toggle_hotkeys(hotkey_var.get()))
@@ -236,6 +259,8 @@ def build_ui():
         try:
             selected = role_var.get()
             state.current_role = selected
+            # 更新表情选择器选项
+            update_expression_options(selected)
             try:
                 idx = roles.index(selected) + 1
                 hotkeys.switch_role_by_index(idx, state)
@@ -243,9 +268,23 @@ def build_ui():
                 logger.exception('切换失败')
         except Exception:
             logger.exception('切换失败')
+    
+    def on_expression_selected(event):
+        """表情选择器回调"""
+        try:
+            selected = expression_var.get()
+            if selected == '随机':
+                state.last_expression = -1
+            else:
+                state.last_expression = int(selected)
+            logger.info(f'表情设置为: {state.last_expression}')
+        except Exception:
+            logger.exception('设置表情失败')
             
     # 用来同步快捷键设置的角色和下拉框的角色
     cmb_role.bind('<<ComboboxSelected>>', on_role_selected)
+    # 绑定表情选择器
+    cmb_expression.bind('<<ComboboxSelected>>', on_expression_selected)
 
 
 def _async_prepare_resources():
@@ -265,17 +304,28 @@ def on_generate_click():
     text = text_widget.get('1.0', 'end').strip()
     content_image = selected_image
 
+    # 读取表情选择器的值
+    try:
+        selected_expr = expression_var.get()
+        if selected_expr == '随机':
+            expressionindex = -1
+        else:
+            expressionindex = int(selected_expr)
+    except Exception:
+        logger.exception('读取表情选择器失败')
+        expressionindex = -1
+
     btn_generate.config(state='disabled')
     status_label.config(text='状态：生成中...')
 
-    # 后台执行耗时生成
-    threading.Thread(target=_worker_generate, args=(text or None, content_image, role), daemon=True).start()
+    # 后台执行耗时生成，传入表情索引
+    threading.Thread(target=_worker_generate, args=(text or None, content_image, role, expressionindex), daemon=True).start()
 
 
-def _worker_generate(text, content_image, role):
+def _worker_generate(text, content_image, role, expressionindex):
     try:
         font_path = core.get_resource_path(core.mahoshojo[role]['font']) if role in core.mahoshojo else None
-        png_bytes, expr = core.generate_image(text=text, content_image=content_image, role_name=role, font_path=font_path, last_value=state.last_expression, expression=-1)
+        png_bytes, expr = core.generate_image(text=text, content_image=content_image, role_name=role, font_path=font_path, last_value=state.last_expression, expression=expressionindex)
         # 更新 last_expression（在主线程也可更新）
         if expr is not None:
             state.last_expression = expr
