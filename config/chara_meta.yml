@@ -1,0 +1,63 @@
+mahoshojo:
+  ema:
+    full_name: 樱羽艾玛
+    emotion_count: 8
+    font: font3.ttf
+  hiro:
+    full_name: 二阶堂希罗
+    emotion_count: 6
+    font: font3.ttf
+  sherri:
+    full_name: 橘雪莉
+    emotion_count: 7
+    font: font3.ttf
+  hanna:
+    full_name: 远野汉娜
+    emotion_count: 5
+    font: font3.ttf
+  anan:
+    full_name: 夏目安安
+    emotion_count: 9
+    font: font3.ttf
+  yuki:
+    full_name: 月代雪
+    emotion_count: 18
+    font: font3.ttf
+  meruru:
+    full_name: 冰上梅露露
+    emotion_count: 6
+    font: font3.ttf
+  noa:
+    full_name: 城崎诺亚
+    emotion_count: 6
+    font: font3.ttf
+  reia:
+    full_name: 莲见蕾雅
+    emotion_count: 7
+    font: font3.ttf
+  miria:
+    full_name: 佐伯米莉亚
+    emotion_count: 4
+    font: font3.ttf
+  nanoka:
+    full_name: 黑部奈叶香
+    emotion_count: 5
+    font: font3.ttf
+  mago:
+    full_name: 宝生玛格
+    emotion_count: 5
+    font: font3.ttf
+  alisa:
+    full_name: 紫藤亚里沙
+    emotion_count: 6
+    font: font3.ttf
+  coco:
+    full_name: 泽渡可可
+    emotion_count: 5
+    font: font3.ttf
+# 在下方添加新角色信息，依次为全名、表情差分数量、使用字体
+# 如：
+#  warden:
+#    full_name: 典狱长
+#    emotion_count: 1
+#    font: font3.ttf

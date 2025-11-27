@@ -215,8 +215,9 @@ def prepare_resources(callback=None):
                         logger.exception("删除文件失败: %s", entry.path)
         for i in range(16):
             for j in range(emotion_count):
-                background_path = get_resource_path(os.path.join('background', f"c{i+1}.png"))
-                overlay_path = get_resource_path(os.path.join(character_name, f"{character_name} ({j+1}).png"))
+                # 更新为新的目录结构
+                background_path = get_resource_path(os.path.join('assets', 'background', f"c{i+1}.png"))
+                overlay_path = get_resource_path(os.path.join('assets', 'chara', character_name, f"{character_name} ({j+1}).png"))
 
                 try:
                     background = Image.open(background_path).convert("RGBA")

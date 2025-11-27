@@ -23,6 +23,7 @@ _registered_hotkeys = []
 class AppState:
     def __init__(self):
         self.current_role = list(core.mahoshojo.keys())[2] #不知道为啥默认橘雪莉
+        self.current_expression=-1
         self.last_expression = -1
         self.auto_paste = True
         self.auto_send = True
@@ -83,9 +84,10 @@ def _perform_keyboard_actions(png_bytes, state: AppState):
 #进行图片生成和发送的工作线程
 def _worker_generate_and_send(text: str, content_image, state: AppState):
     try:
-        font_path = core.get_resource_path(core.mahoshojo[state.current_role]["font"]) if state.current_role in core.mahoshojo else None
+        # 更新为新的目录结构
+        font_path = core.get_resource_path(os.path.join('assets', 'fonts', core.mahoshojo[state.current_role]["font"])) if state.current_role in core.mahoshojo else None
         # 使用 state.last_expression 作为 expression 参数，这样热键生成也会使用 GUI 设置的表情
-        png_bytes, expr = core.generate_image(text=text, content_image=content_image, role_name=state.current_role, font_path=font_path, last_value=-1, expression=state.last_expression)
+        png_bytes, expr = core.generate_image(text=text, content_image=content_image, role_name=state.current_role, font_path=font_path, last_value=state.last_expression, expression=state.current_expression)
         # 更新状态
         if expr is not None:
             state.last_expression = expr
@@ -144,14 +146,6 @@ def switch_role_by_index(idx: int, state: AppState):
         return True
     return False
 
-#设置表情
-def set_expression(expr: int, state: AppState):
-    state.last_expression = -1
-    try:
-        state.last_expression = expr
-        logger.info("设置表情： %s", expr)
-    except Exception:
-        logger.exception("设置表情失败")
 
 #切换自动粘贴
 def toggle_auto_paste(state: AppState):

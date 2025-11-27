@@ -106,6 +106,7 @@ def draw_text_auto(
     在指定矩形内自适应字号绘制文本；
     中括号及括号内文字使用 bracket_color。
     支持彩色emoji表情显示。
+    优化版本：减少重复计算，缓存字体对象
     """
 
     # --- 1. 打开图像 ---
@@ -133,7 +134,7 @@ def draw_text_auto(
         raise ValueError("无效的文字区域。")
     region_w, region_h = x2 - x1, y2 - y1
 
-    # --- 2. 字体加载 ---
+    # --- 2. 字体加载（使用缓存）---
     def _load_font(size: int) -> ImageFont.FreeTypeFont:
         return _load_font_cached(font_path, size)
 
@@ -315,7 +316,7 @@ def draw_text_auto(
     elif image_overlay is not None and img_overlay is None:
         print("Warning: overlay image is not exist.")
 
-    # 自动在图片上写角色专属文字
+    # 自动在图片上写角色专属文字（优化：使用缓存的字体）
     if text_configs_dict and role_name in text_configs_dict:
         # 重新创建普通draw对象用于绘制角色名字
         regular_draw = ImageDraw.Draw(img)
@@ -324,19 +325,22 @@ def draw_text_auto(
         
         for config in text_configs_dict[role_name]:
             char_text = config["text"]
+            if not char_text:  # 跳过空文本
+                continue
             position = config["position"]
             font_color = config["font_color"]
             font_size = config["font_size"]
         
-            # 使用 get_resource_path 获取字体文件路径
-            font_path_char = get_resource_path("font3.ttf")
-            char_font = ImageFont.truetype(font_path_char, font_size)
+            # 使用新的assets/fonts路径
+            font_path_char = get_resource_path(os.path.join("assets", "fonts", "font3.ttf"))
+            char_font = _load_font_cached(font_path_char, font_size)
             
             shadow_position = (position[0] + shadow_offset[0], position[1] + shadow_offset[1])
             
             regular_draw.text(shadow_position, char_text, fill=shadow_color, font=char_font)
             regular_draw.text(position, char_text, fill=font_color, font=char_font)
     
+    # 优化：只在需要时压缩
     img = compress_image(img)
     
     # --- 9. 输出 PNG ---

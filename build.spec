@@ -5,7 +5,11 @@ a = Analysis(
     ['gui.py'],
     pathex=[],
     binaries=[],
-    datas=[('font3.ttf', '.'), ('background', 'background'), ('D:\\user\\document\\Text_box-of-mahoushoujo_no_majosaiban\\alisa', 'alisa'), ('D:\\user\\document\\Text_box-of-mahoushoujo_no_majosaiban\\anan', 'anan'), ('D:\\user\\document\\Text_box-of-mahoushoujo_no_majosaiban\\background', 'background'), ('D:\\user\\document\\Text_box-of-mahoushoujo_no_majosaiban\\coco', 'coco'), ('D:\\user\\document\\Text_box-of-mahoushoujo_no_majosaiban\\ema', 'ema'), ('D:\\user\\document\\Text_box-of-mahoushoujo_no_majosaiban\\hanna', 'hanna'), ('D:\\user\\document\\Text_box-of-mahoushoujo_no_majosaiban\\hiro', 'hiro'), ('D:\\user\\document\\Text_box-of-mahoushoujo_no_majosaiban\\mago', 'mago'), ('D:\\user\\document\\Text_box-of-mahoushoujo_no_majosaiban\\meruru', 'meruru'), ('D:\\user\\document\\Text_box-of-mahoushoujo_no_majosaiban\\miria', 'miria'), ('D:\\user\\document\\Text_box-of-mahoushoujo_no_majosaiban\\nanoka', 'nanoka'), ('D:\\user\\document\\Text_box-of-mahoushoujo_no_majosaiban\\noa', 'noa'), ('D:\\user\\document\\Text_box-of-mahoushoujo_no_majosaiban\\reia', 'reia'), ('D:\\user\\document\\Text_box-of-mahoushoujo_no_majosaiban\\sherri', 'sherri'), ('D:\\user\\document\\Text_box-of-mahoushoujo_no_majosaiban\\yuki', 'yuki')],
+    datas=[
+        ('assets/fonts', 'assets/fonts'),
+        ('assets/background', 'assets/background'),
+        ('assets/chara', 'assets/chara'),
+    ],
     hiddenimports=['keyboard', 'pyperclip', 'win32clipboard'],
     hookspath=[],
     hooksconfig={},

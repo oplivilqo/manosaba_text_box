@@ -144,8 +144,8 @@ def paste_image_auto(
         shadow_offset = (2, 2)  # 阴影偏移量
         shadow_color = (0, 0, 0)  # 黑色阴影
         
-        # 使用 get_resource_path 获取字体文件路径（只获取一次）
-        font_path = get_resource_path("font3.ttf")
+        # 使用新的assets/fonts路径
+        font_path = get_resource_path(os.path.join("assets", "fonts", "font3.ttf"))
         
         for config in text_configs_dict[role_name]:
             text = config["text"]

@@ -12,6 +12,7 @@ import hotkeys
 import keyboard
 import queue
 import tkinter.font as tkfont
+import os
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -274,10 +275,10 @@ def build_ui():
         try:
             selected = expression_var.get()
             if selected == '随机':
-                state.last_expression = -1
+                state.current_expression = -1
             else:
-                state.last_expression = int(selected)
-            logger.info(f'表情设置为: {state.last_expression}')
+                state.current_expression = int(selected)
+            logger.info(f'表情设置为: {state.current_expression}')
         except Exception:
             logger.exception('设置表情失败')
             
@@ -324,7 +325,8 @@ def on_generate_click():
 
 def _worker_generate(text, content_image, role, expressionindex):
     try:
-        font_path = core.get_resource_path(core.mahoshojo[role]['font']) if role in core.mahoshojo else None
+        # 使用新的assets/fonts路径
+        font_path = core.get_resource_path(os.path.join("assets", "fonts", core.mahoshojo[role]['font'])) if role in core.mahoshojo else None
         png_bytes, expr = core.generate_image(text=text, content_image=content_image, role_name=role, font_path=font_path, last_value=state.last_expression, expression=expressionindex)
         # 更新 last_expression（在主线程也可更新）
         if expr is not None:
