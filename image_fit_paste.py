@@ -10,7 +10,6 @@ _font_cache = {}
 
 # ===== PyInstaller 资源路径处理函数 =====
 def get_resource_path(relative_path):
-    """获取资源文件的绝对路径，兼容开发环境和打包后的环境"""
     try:
         base_path = sys._MEIPASS
     except AttributeError:
