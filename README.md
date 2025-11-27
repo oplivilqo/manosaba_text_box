@@ -1,4 +1,4 @@
-8<div align="center">
+<div align="center">
 
 # 🎭魔法少女的魔女裁判文本框脚本
 
@@ -11,6 +11,12 @@
 一个基于Python的自动化表情包生成工具，能够快速生成带有自定义文本的魔法少女的魔女裁判文本框图片。[灵感来源与代码参考](https://github.com/MarkCup-Official/Anan-s-Sketchbook-Chat-Box)
 
 <div align="left">
+
+##Todo List
+
+1.参考原仓库，修改目录结构，加入自动校验并识别资源文件的功能~~并白嫖原作者即将加入的其他角色~~
+
+2.把每次生成时绘制名字改为预处理时直接绘制
 
 ## 修改说明
 
@@ -145,6 +151,7 @@
 <div align="right">
   
 ### 以上. 柊回文————2025.11.15
+
 
 
 
