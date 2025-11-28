@@ -135,9 +135,16 @@ mahoshojo_over = [2339,800]   #文本范围右下角位置
 #获取绝对路径
 def get_resource_path(related_path):
     try:
-        base_path = sys._MEIPASS #pyinstaller创建的临时目录
-    except AttributeError:
-        base_path = os.path.dirname(os.path.abspath(__file__)) #未打包时的目录
+        # 打包后：sys.executable 是 exe 的路径
+        if getattr(sys, 'frozen', False):
+            # 获取 exe 所在目录
+            base_path = os.path.dirname(sys.executable)
+        else:
+            # 开发环境：脚本文件所在目录
+            base_path = os.path.dirname(os.path.abspath(__file__))
+    except Exception:
+        base_path = os.path.dirname(os.path.abspath(__file__))
+    
     return os.path.join(base_path, related_path)
 
 #获取用户魔裁文件夹路径，若不存在则创建
