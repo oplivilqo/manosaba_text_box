@@ -26,6 +26,8 @@
 
 本仓库由e^iπ=-1基于oplivilqo的项目二次开发（这玩意是不是倒过来比较好看）
 
+19.__添加了千早爱音🤓__
+
 18.更新requirements.txt
 
 17.将assets目录改为外部加载，为适配config目录做了一些准备工作，重写了编译文件，取消单文件版支持。
@@ -52,7 +54,7 @@
 
 6.增加了切换自动发送/粘贴功能，详情见控制台
 
-5.增加了方便的build脚本，生成方式：build.ps1/build_onefile.ps1
+5.增加了方便的build脚本，生成方式：build_quick.ps1/pyinstaller MagicGirlChatBox.spec
 
 4.支持系统通用的emoji（TIM由于会自动将输入的emoji变成图片，故暂不支持，QQ未测试）
 

@@ -32,7 +32,8 @@ mahoshojo = {
     "nanoka": {"emotion_count": 5, "font": "font3.ttf"},  # 黑部奈叶香
     "mago": {"emotion_count": 5, "font": "font3.ttf"},   # 宝生玛格
     "alisa": {"emotion_count": 6, "font": "font3.ttf"},   # 紫藤亚里沙
-    "coco": {"emotion_count": 5, "font": "font3.ttf"}
+    "coco": {"emotion_count": 5, "font": "font3.ttf"},
+    "anon": {"emotion_count":1,"font":"font3.ttf"}
 }
 
 # 角色文字配置字典 - 每个角色对应4个文字配置
@@ -120,7 +121,13 @@ text_configs_dict = {
     {"text":"代","position":(948,175),"font_color":(255, 255, 255),"font_size":92},
     {"text":"雪","position":(1053,117),"font_color":(255, 255, 255),"font_size":147} ,   
     {"text":"","position":(0,0),"font_color":(255, 255, 255),"font_size":1}
-        ]
+        ],
+    "anon": [  # 千早爱音
+        {"text":"千","position":(759,73),"font_color":(253,145,175),"font_size":186},
+        {"text":"早","position":(949,175),"font_color":(255, 255, 255),"font_size":92},
+        {"text":"爱","position":(1039,117),"font_color":(255, 255, 255),"font_size":147},
+        {"text":"音","position":(1183,175),"font_color":(255, 255, 255),"font_size":92}
+    ],
 }
 
 #文本框范围
