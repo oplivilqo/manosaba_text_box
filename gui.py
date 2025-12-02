@@ -13,7 +13,7 @@ import keyboard
 import queue
 import tkinter.font as tkfont
 import os
-from config_loader import MAHOSHOJO, TEXT_CONFIGS, load_all_and_validate
+from config_loader import load_all_and_validate, MAHOSHOJO, BACKGROUND_INDEXES
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -22,6 +22,9 @@ logger = logging.getLogger(__name__)
 state = hotkeys.AppState()
 roles = list(core.mahoshojo.keys())
 selected_image = None  # 保存剪贴板里的图片
+
+# 背景选择状态
+selected_bg_index = -1  # -1 表示随机
 
 # Tk 主窗口
 root = tk.Tk()
@@ -55,7 +58,7 @@ class PreloadWindow(tk.Toplevel):
         super().__init__(parent)
         self.parent = parent
         self.title(title)
-        self.geometry('600x360')
+        self.geometry('640x420')
         self.protocol('WM_DELETE_WINDOW', lambda: None)
         self.transient(parent)
         self.grab_set()
@@ -162,6 +165,7 @@ class PreloadWindow(tk.Toplevel):
 
 def build_ui():
     global role_var, text_widget, btn_generate, preview_label, status_label, auto_paste_var, auto_send_var, hotkey_var
+    global selected_bg_index
 
     frm_top = ttk.Frame(root)
     frm_top.pack(fill='x', padx=8, pady=6)
@@ -170,30 +174,39 @@ def build_ui():
     ttk.Label(frm_top, text='角色:').pack(side='left')
     # 角色下拉框
     role_var = tk.StringVar(value=state.current_role)
-    cmb_role = ttk.Combobox(frm_top, values=roles, textvariable=role_var, state='readonly')
+    cmb_role = ttk.Combobox(frm_top, values=list(core.mahoshojo.keys()), textvariable=role_var, state='readonly')
     cmb_role.pack(side='left', padx=(4, 8))
 
-    #表情选择标签
+    # 表情选择标签
     ttk.Label(frm_top, text='表情:').pack(side='left')
-    #表情下拉框
+    # 表情下拉框
     global expression_var, cmb_expression
     expression_var = tk.StringVar(value='随机')
     cmb_expression = ttk.Combobox(frm_top, textvariable=expression_var, state='readonly', width=8)
     cmb_expression.pack(side='left', padx=(4, 8))
-    
-    #更新表情选择器
-    def update_expression_options(role_name):
+
+    # 背景选择标签
+    ttk.Label(frm_top, text='背景:').pack(side='left')
+    # 背景下拉框
+    global bg_var, cmb_bg
+    bg_var = tk.StringVar(value='随机')
+    # 使用扫描到的背景数量
+    count_bg = len(BACKGROUND_INDEXES) or 16
+    options_bg = ['随机'] + [str(i) for i in range(1, count_bg + 1)]
+    cmb_bg = ttk.Combobox(frm_top, textvariable=bg_var, values=options_bg, state='readonly', width=8)
+    cmb_bg.pack(side='left', padx=(4, 8))
+
+    def on_bg_selected(event):
+        global selected_bg_index
         try:
-            emotion_count = core.mahoshojo[role_name]['emotion_count']
-            options = ['随机'] + [str(i) for i in range(1, emotion_count + 1)]
-            cmb_expression['values'] = options
-            # 重置为随机
-            expression_var.set('随机')
+            val = bg_var.get()
+            selected_bg_index = -1 if val == '随机' else int(val)
+            logger.info('背景设置为: %s', val)
         except Exception:
-            logger.exception('更新表情选项失败')
-    
-    # 初始设置表情选项
-    update_expression_options(state.current_role)
+            logger.exception('设置背景失败')
+            selected_bg_index = -1
+
+    cmb_bg.bind('<<ComboboxSelected>>', on_bg_selected)
 
     # 热键启用复选框
     hotkey_var = tk.BooleanVar(value=False)
@@ -262,6 +275,19 @@ def build_ui():
     status_label.pack(fill='x', padx=8, pady=(0,8))
 
 
+    def update_expression_options(role_name):
+        try:
+            emotion_count = core.mahoshojo[role_name]['emotion_count']
+            options = ['随机'] + [str(i) for i in range(1, emotion_count + 1)]
+            cmb_expression['values'] = options
+            # 重置为随机
+            expression_var.set('随机')
+        except Exception:
+            logger.exception('更新表情选项失败')
+    
+    # 初始设置表情选项
+    update_expression_options(state.current_role)
+
     def on_role_selected(event):
         try:
             selected = role_var.get()
@@ -269,7 +295,7 @@ def build_ui():
             # 更新表情选择器选项
             update_expression_options(selected)
             try:
-                idx = roles.index(selected) + 1
+                idx = list(core.mahoshojo.keys()).index(selected) + 1
                 hotkeys.switch_role_by_index(idx, state)
             except Exception:
                 logger.exception('切换失败')
@@ -280,17 +306,12 @@ def build_ui():
         """表情选择器回调"""
         try:
             selected = expression_var.get()
-            if selected == '随机':
-                state.current_expression = -1
-            else:
-                state.current_expression = int(selected)
-            logger.info(f'表情设置为: {selected}')
+            state.current_expression = -1 if selected == '随机' else int(selected)
+            logger.info('表情设置为: %s', selected)
         except Exception:
             logger.exception('设置表情失败')
             
-    # 用来同步快捷键设置的角色和下拉框的角色
     cmb_role.bind('<<ComboboxSelected>>', on_role_selected)
-    # 绑定表情选择器
     cmb_expression.bind('<<ComboboxSelected>>', on_expression_selected)
 
 
@@ -302,10 +323,7 @@ def on_generate_click():
     # 读取表情选择器的值
     try:
         selected_expr = expression_var.get()
-        if selected_expr == '随机':
-            expressionindex = -1
-        else:
-            expressionindex = int(selected_expr)
+        expressionindex = -1 if selected_expr == '随机' else int(selected_expr)
     except Exception:
         logger.exception('读取表情选择器失败')
         expressionindex = -1
@@ -314,14 +332,14 @@ def on_generate_click():
     status_label.config(text='状态：生成中...')
 
     # 后台执行耗时生成，传入表情索引
-    threading.Thread(target=_worker_generate, args=(text or None, content_image, role, expressionindex), daemon=True).start()
+    threading.Thread(target=_worker_generate, args=(text or None, content_image, role, expressionindex, selected_bg_index), daemon=True).start()
 
 
-def _worker_generate(text, content_image, role, expressionindex):
+def _worker_generate(text, content_image, role, expressionindex, bg_index):
     try:
         # 使用新的assets/fonts路径
         font_path = core.get_resource_path(os.path.join("assets", "fonts", core.mahoshojo[role]['font'])) if role in core.mahoshojo else None
-        png_bytes, expr = core.generate_image(text=text, content_image=content_image, role_name=role, font_path=font_path, last_value=state.last_expression, expression=expressionindex)
+        png_bytes, expr = core.generate_image(text=text, content_image=content_image, role_name=role, font_path=font_path, last_value=state.last_expression, expression=expressionindex, bg_index=bg_index)
         # 更新 last_expression（在主线程也可更新）
         if expr is not None:
             state.last_expression = expr

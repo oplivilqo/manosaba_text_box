@@ -9,7 +9,7 @@ import time
 from PIL import Image
 from text_fit_draw import draw_text_auto,draw_name
 from image_fit_paste import paste_image_auto
-from config_loader import load_all_and_validate
+from config_loader import load_all_and_validate, BACKGROUND_INDEXES
 
 logger = logging.getLogger(__name__)
 
@@ -228,7 +228,9 @@ def prepare_resources(callback=None):
         logger.info("正在预处理：%s", character_name)
         emotion_count = mahoshojo[character_name]["emotion_count"]
         existing_count = sum(1 for entry in os.scandir(magic_cut_folder) if entry.is_file() and entry.name.startswith(character_name))
-        if existing_count == 16 * emotion_count:
+        # 背景数量根据扫描结果（回退16)
+        bg_count = len(BACKGROUND_INDEXES) or 16
+        if existing_count == bg_count * emotion_count:
             _cb("已存在，跳过")
             logger.info("已存在，跳过 %s", character_name)
             continue
@@ -241,10 +243,12 @@ def prepare_resources(callback=None):
                         logger.info("删除旧文件：%s", entry.name)
                     except Exception:
                         logger.exception("删除文件失败: %s", entry.path)
-        for i in range(16):
+        # 遍历所有背景索引（保持兼容，若为空则1..16）
+        bg_indexes = sorted(BACKGROUND_INDEXES) if BACKGROUND_INDEXES else list(range(1,17))
+        for i, bg_idx in enumerate(bg_indexes):
             for j in range(emotion_count):
                 #更新为新的目录结构
-                background_path = get_resource_path(os.path.join('assets', 'background', f"c{i+1}.png"))
+                background_path = get_resource_path(os.path.join('assets', 'background', f"c{bg_idx}.png"))
                 overlay_path = get_resource_path(os.path.join('assets', 'chara', character_name, f"{character_name} ({j+1}).png"))
 
                 try:
@@ -261,7 +265,7 @@ def prepare_resources(callback=None):
                     logger.exception("无法打开叠加图像文件 %s : %s", overlay_path, e)
                     continue
 
-                img_num = j * 16 + i + 1
+                img_num = j * (len(bg_indexes)) + (i + 1)
                 result = background.copy()
                 result.paste(overlay, (0, 134), overlay)
 
@@ -294,9 +298,8 @@ def preheat_cache():
     #只预加载每个角色的前几张图片，避免占用过多内存
     for character_name in mahoshojo.keys():
         emotion_count = mahoshojo[character_name]["emotion_count"]
-        #预加载每个表情的第一张
         for j in range(min(emotion_count, 3)):  #限制预加载数量
-            img_num = j * 16 + 1
+            img_num = j * (len(BACKGROUND_INDEXES) or 16) + 1
             image_path = os.path.join(magic_cut_folder, f"{character_name} ({img_num}).jpg")
             if os.path.exists(image_path):
                 try:
@@ -305,16 +308,22 @@ def preheat_cache():
                     logger.exception(f"预热缓存失败: {image_path}")
 
 
-def get_random_expression(character_name,last_value=-1,expression=-1):
+def get_random_expression(character_name,last_value=-1,expression=-1,bg_index=-1):
     if character_name not in mahoshojo:
         raise ValueError(f"角色名称 '{character_name}' 无效。")
     
+    bg_count = len(BACKGROUND_INDEXES) or 16
+    def normalize_bg(v: int) -> int:
+        if v < 1 or v > bg_count:
+            return (v - 1) % bg_count + 1
+        return v
+
     if expression != -1:
         if expression < 1 or expression > mahoshojo[character_name]["emotion_count"]:
             expression = (expression - 1) % mahoshojo[character_name]["emotion_count"] + 1
             logger.info(f"表情值超出范围，已调整为有效值：{expression}")
-        bg=random.randint(1,16)
-        img_num = (expression - 1) * 16 + bg
+        bg = normalize_bg(bg_index) if bg_index != -1 else random.randint(1, bg_count)
+        img_num = (expression - 1) * bg_count + bg
         return os.path.join(get_magic_cut_folder(), f"{character_name} ({img_num}).jpg"),expression
 
     max_attempts = 10
@@ -325,17 +334,18 @@ def get_random_expression(character_name,last_value=-1,expression=-1):
     if attempts >= max_attempts:
         logger.warning("达到最大尝试次数，返回随机表情")
         expression = random.randint(1, mahoshojo[character_name]["emotion_count"])
-    return os.path.join(get_magic_cut_folder(), f"{character_name} ({(expression - 1) * 16 + random.randint(1,16)}).jpg"),expression
+    bg = normalize_bg(bg_index) if bg_index != -1 else random.randint(1, bg_count)
+    return os.path.join(get_magic_cut_folder(), f"{character_name} ({(expression - 1) * bg_count + bg}).jpg"),expression
 
 
-def generate_image(text,content_image,role_name,font_path='font3.ttf',last_value=-1,expression=-1):
+def generate_image(text,content_image,role_name,font_path='font3.ttf',last_value=-1,expression=-1,bg_index=-1):
     if not text and content_image is None:
         logger.warning("没有文本/图像")
         return None, expression
     png_bytes=None
     start_ts = time.perf_counter()
     try:
-        address, expression = get_random_expression(role_name,last_value,expression)
+        address, expression = get_random_expression(role_name,last_value,expression,bg_index)
 
         TEXT_BOX_TOPLEFT= (mahoshojo_postion[0], mahoshojo_postion[1])
         IMAGE_BOX_BOTTOMRIGHT= (mahoshojo_over[0], mahoshojo_over[1])
