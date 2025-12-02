@@ -55,6 +55,10 @@ mahoshojo:
     full_name: 泽渡可可
     emotion_count: 5
     font: font3.ttf
+  anon:
+    full name: 千早爱音
+    emotion_count: 1
+    font: font3.ttf
 # 在下方添加新角色信息，依次为全名、表情差分数量、使用字体
 # 如：
 #  warden:

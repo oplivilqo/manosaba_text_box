@@ -10,10 +10,11 @@ import psutil
 import os
 import core
 import clipboard
+from config_loader import load_all_and_validate, PROCESS_WHITELIST
 
 logger = logging.getLogger(__name__)
 
-# 默认窗口白名单
+# 默认窗口白名单（由配置覆盖，保留作回退）
 DEFAULT_WINDOW_WHITELIST = ["TIM.exe", "WeChat.exe", "Weixin.exe", "WeChatApp.exe", "QQ.exe"]
 
 # 存放已注册的热键句柄
@@ -28,7 +29,8 @@ class AppState:
         self.auto_paste = True
         self.auto_send = True
         self.enable_whitelist = True
-        self.window_whitelist = DEFAULT_WINDOW_WHITELIST
+        # 优先使用配置中的白名单
+        self.window_whitelist = PROCESS_WHITELIST or DEFAULT_WINDOW_WHITELIST
         self.busy = False
         self.delay = 0.08
         #热键

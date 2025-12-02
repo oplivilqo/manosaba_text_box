@@ -9,6 +9,7 @@ import time
 from PIL import Image
 from text_fit_draw import draw_text_auto,draw_name
 from image_fit_paste import paste_image_auto
+from config_loader import load_all_and_validate
 
 logger = logging.getLogger(__name__)
 
@@ -17,28 +18,28 @@ _image_cache = {}
 _cache_enabled = True
 
 #全局变量区
-# 角色配置字典
+# 角色配置字典（由配置覆盖）
 mahoshojo = {
-    "ema": {"emotion_count": 8, "font": "font3.ttf"},     # 樱羽艾玛
-    "hiro": {"emotion_count": 6, "font": "font3.ttf"},    # 二阶堂希罗
-    "sherri": {"emotion_count": 7, "font": "font3.ttf"},  # 橘雪莉
-    "hanna": {"emotion_count": 5, "font": "font3.ttf"},   # 远野汉娜
-    "anan": {"emotion_count": 9, "font": "font3.ttf"},    # 夏目安安
+    "ema": {"emotion_count": 8, "font": "font3.ttf"},
+    "hiro": {"emotion_count": 6, "font": "font3.ttf"},
+    "sherri": {"emotion_count": 7, "font": "font3.ttf"},
+    "hanna": {"emotion_count": 5, "font": "font3.ttf"},
+    "anan": {"emotion_count": 9, "font": "font3.ttf"},
     "yuki" : {"emotion_count": 18, "font": "font3.ttf"},
-    "meruru": {"emotion_count": 6, "font": "font3.ttf"},   # 冰上梅露露
-    "noa": {"emotion_count": 6, "font": "font3.ttf"},     # 城崎诺亚
-    "reia": {"emotion_count": 7, "font": "font3.ttf"},    # 莲见蕾雅
-    "miria": {"emotion_count": 4, "font": "font3.ttf"},   # 佐伯米莉亚
-    "nanoka": {"emotion_count": 5, "font": "font3.ttf"},  # 黑部奈叶香
-    "mago": {"emotion_count": 5, "font": "font3.ttf"},   # 宝生玛格
-    "alisa": {"emotion_count": 6, "font": "font3.ttf"},   # 紫藤亚里沙
+    "meruru": {"emotion_count": 6, "font": "font3.ttf"},
+    "noa": {"emotion_count": 6, "font": "font3.ttf"},
+    "reia": {"emotion_count": 7, "font": "font3.ttf"},
+    "miria": {"emotion_count": 4, "font": "font3.ttf"},
+    "nanoka": {"emotion_count": 5, "font": "font3.ttf"},
+    "mago": {"emotion_count": 5, "font": "font3.ttf"},
+    "alisa": {"emotion_count": 6, "font": "font3.ttf"},
     "coco": {"emotion_count": 5, "font": "font3.ttf"},
     "anon": {"emotion_count":1,"font":"font3.ttf"}
 }
 
-# 角色文字配置字典 - 每个角色对应4个文字配置
+# 角色文字配置字典 - 每个角色对应4个文字配置（由配置覆盖）
 text_configs_dict = {
-    "nanoka": [  # 黑部奈叶香
+    "nanoka": [
         {"text":"黑","position":(759,63),"font_color":(131,143,147),"font_size":196},
         {"text":"部","position":(955,175),"font_color":(255, 255, 255),"font_size":92},
         {"text":"奈","position":(1053,117),"font_color":(255, 255, 255),"font_size":147},
@@ -130,9 +131,9 @@ text_configs_dict = {
     ],
 }
 
-#文本框范围
-mahoshojo_postion = [728,355] #文本范围起始位置
-mahoshojo_over = [2339,800]   #文本范围右下角位置
+#文本框范围（暂保留硬编码，可后续配置化）
+mahoshojo_postion = [728,355]
+mahoshojo_over = [2339,800]
 #变量区结束
 
 
@@ -169,15 +170,12 @@ def get_magic_cut_folder():
     os.makedirs(magic_cut_folder, exist_ok=True)
     return magic_cut_folder
 
-#启用/禁用缓存（等待后续加到gui里）
+#启用/禁用缓存
 def set_cache_enabled(enabled: bool):
     global _cache_enabled
     _cache_enabled = enabled
     if not enabled:
         clear_image_cache()
-
-
-
 
 #清空图片缓存
 def clear_image_cache():
@@ -199,18 +197,30 @@ def load_image_cached(image_path: str) -> Image.Image:
             logger.exception(f"加载图片失败 {image_path}: {e}")
             raise
     
-    # 返回副本
     return _image_cache[image_path].copy()
 
 #预处理资源文件并保存到文件夹（新增了回传功能~）
 def prepare_resources(callback=None):
-    #回传~
+    # 先加载配置并校验
+    from config_loader import load_all_and_validate
     def _cb(msg):
         try:
             if callback:
                 callback(msg)
         except Exception:
             logger.exception('回传错误')
+    loaded, report = load_all_and_validate(os_name='win32', callback=_cb)
+    # 应用配置到全局
+    try:
+        if loaded.get('mahoshojo'):
+            globals()['mahoshojo'] = loaded['mahoshojo']
+        if loaded.get('text_configs'):
+            globals()['text_configs_dict'] = loaded['text_configs']
+    except Exception:
+        logger.exception('应用配置失败')
+    if not report.get('ok', False):
+        raise RuntimeError('资源校验失败')
+
     magic_cut_folder = get_magic_cut_folder()
 
     for character_name in mahoshojo.keys():
@@ -275,6 +285,7 @@ def prepare_resources(callback=None):
     _cb("缓存预热完成")
     logger.info("缓存预热完成")
 
+
 def preheat_cache():
     if not _cache_enabled:
         return
@@ -293,7 +304,7 @@ def preheat_cache():
                 except Exception:
                     logger.exception(f"预热缓存失败: {image_path}")
 
-#不重复的随机表情生成
+
 def get_random_expression(character_name,last_value=-1,expression=-1):
     if character_name not in mahoshojo:
         raise ValueError(f"角色名称 '{character_name}' 无效。")
@@ -306,7 +317,7 @@ def get_random_expression(character_name,last_value=-1,expression=-1):
         img_num = (expression - 1) * 16 + bg
         return os.path.join(get_magic_cut_folder(), f"{character_name} ({img_num}).jpg"),expression
 
-    max_attempts = 10  # 最大尝试次数
+    max_attempts = 10
     attempts = 0
     while (expression==-1 or expression==last_value) and attempts < max_attempts:
         expression=random.randint(1, mahoshojo[character_name]["emotion_count"])
@@ -316,30 +327,25 @@ def get_random_expression(character_name,last_value=-1,expression=-1):
         expression = random.randint(1, mahoshojo[character_name]["emotion_count"])
     return os.path.join(get_magic_cut_folder(), f"{character_name} ({(expression - 1) * 16 + random.randint(1,16)}).jpg"),expression
 
-#图片生成
+
 def generate_image(text,content_image,role_name,font_path='font3.ttf',last_value=-1,expression=-1):
     if not text and content_image is None:
         logger.warning("没有文本/图像")
         return None, expression
     png_bytes=None
-    # 记录开始时间并在返回前记录耗时到日志
     start_ts = time.perf_counter()
     try:
         address, expression = get_random_expression(role_name,last_value,expression)
 
-        # 文本框左上角坐标 (x, y), 同时适用于图片框
         TEXT_BOX_TOPLEFT= (mahoshojo_postion[0], mahoshojo_postion[1])
-        # 文本框右下角坐标 (x, y), 同时适用于图片框
         IMAGE_BOX_BOTTOMRIGHT= (mahoshojo_over[0], mahoshojo_over[1])
         
-        #处理图片
         if content_image is not None:
             try:
                 logger.info("检测到图片")
-                # 使用缓存加载
                 base_image = load_image_cached(address)
                 png_bytes = paste_image_auto(
-                    image_source=base_image,  # 直接传入Image对象
+                    image_source=base_image,
                     image_overlay=None,
                     top_left=TEXT_BOX_TOPLEFT,
                     bottom_right=IMAGE_BOX_BOTTOMRIGHT,
@@ -348,9 +354,9 @@ def generate_image(text,content_image,role_name,font_path='font3.ttf',last_value
                     valign="middle",
                     padding=12,
                     allow_upscale=True, 
-                    keep_alpha=True,      # 使用内容图 alpha 作为蒙版 
-                    role_name=role_name,  # 传递角色名称
-                    text_configs_dict=text_configs_dict,  # 传递文字配置字典
+                    keep_alpha=True,
+                    role_name=role_name,
+                    text_configs_dict=text_configs_dict,
                 )
             except Exception as e:
                 logger.error("图片处理出错：%s", e)
@@ -358,10 +364,9 @@ def generate_image(text,content_image,role_name,font_path='font3.ttf',last_value
         elif text:
             try:
                 logger.info('检测到文本：%s', text)
-                # 使用缓存加载
                 base_image = load_image_cached(address)
                 png_bytes = draw_text_auto(
-                    image_source=base_image,  # 直接传入Image对象
+                    image_source=base_image,
                     image_overlay=None,
                     top_left=TEXT_BOX_TOPLEFT,
                     bottom_right=IMAGE_BOX_BOTTOMRIGHT,
@@ -369,10 +374,10 @@ def generate_image(text,content_image,role_name,font_path='font3.ttf',last_value
                     align="left",
                     valign='top' ,
                     color=(255, 255, 255), 
-                    max_font_height=145,        # 例如限制最大字号高度为 145 像素
+                    max_font_height=145,
                     font_path=font_path,
-                    role_name=role_name,  # 传递角色名称
-                    text_configs_dict=text_configs_dict,  # 传递文字配置字典
+                    role_name=role_name,
+                    text_configs_dict=text_configs_dict,
                 )
             except Exception as e:
                 logger.error("文本处理出错：%s", e)
@@ -385,5 +390,4 @@ def generate_image(text,content_image,role_name,font_path='font3.ttf',last_value
         try:
             logger.info("生成信息: role=%s expression=%s mode=%s duration=%.1fms", role_name, expression, 'image' if content_image is not None else 'text', duration_ms)
         except Exception:
-            # 保底，不影响主流程
             logger.info("生成耗时: %.1fms", duration_ms)

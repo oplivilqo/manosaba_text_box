@@ -237,6 +237,23 @@ text_configs:
       position: [0, 0]
       font_color: [255, 255, 255]
       font_size: 1
+  anon:
+    - text: 千
+      position: [759, 73]
+      font_color: [253, 145, 175]
+      font_size: 186
+    - text: 早
+      position: [949, 175]
+      font_color: [255, 255, 255]
+      font_size: 92
+    - text: 爱
+      position: [1039, 117]
+      font_color: [255, 255, 255]
+      font_size: 147
+    - text: 音
+      position: [1183, 175]
+      font_color: [255, 255, 255]
+      font_size: 92
 # 在下方添加新角色的文字配置，依次为文字内容、位置（x, y）、字体颜色（R, G, B）、字体大小
 # 如：
 #  warden:

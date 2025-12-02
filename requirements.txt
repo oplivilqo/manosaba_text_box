@@ -20,3 +20,5 @@ pilmoji>=2.0.4,<3.0.0
 
 # Type hints support (auto-installed for Python < 3.10)
 typing-extensions>=4.0.0; python_version < '3.10'
+
+PyYAML>=6.0

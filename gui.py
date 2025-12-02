@@ -13,6 +13,7 @@ import keyboard
 import queue
 import tkinter.font as tkfont
 import os
+from config_loader import MAHOSHOJO, TEXT_CONFIGS, load_all_and_validate
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -123,6 +124,17 @@ class PreloadWindow(tk.Toplevel):
 
         def worker():
             try:
+                # 调用统一加载与校验入口
+                loaded, report = load_all_and_validate(os_name='win32', callback=cb)
+                # 应用到 core 的全局变量（先不移除旧值，预处理后使用新的配置）
+                try:
+                    core.mahoshojo = loaded.get('mahoshojo', core.mahoshojo) or core.mahoshojo
+                    core.text_configs_dict = loaded.get('text_configs', core.text_configs_dict) or core.text_configs_dict
+                except Exception:
+                    logger.exception('应用配置失败')
+                # 校验失败则抛错中止
+                if not report.get('ok', False):
+                    raise RuntimeError('资源校验失败，请检查配置与 assets 目录')
                 core.prepare_resources(callback=cb)
                 self._q.put('__PRELOAD_DONE__')
             except Exception:
