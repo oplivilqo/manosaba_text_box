@@ -1,0 +1,9 @@
+font_family: font3
+font_size: 152
+image_compression:
+  pixel_reduction_enabled: true
+  pixel_reduction_ratio: 50
+quick_characters: {}
+Emotional Matching Switch: false
+sentiment_matching:
+  enabled: false

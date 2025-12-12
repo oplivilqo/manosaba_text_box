@@ -1,0 +1,36 @@
+darwin:
+  character_1: <ctrl>+1
+  character_2: <ctrl>+2
+  character_3: <ctrl>+3
+  character_4: <ctrl>+4
+  character_5: <ctrl>+5
+  character_6: <ctrl>+6
+  delete_cache: <ctrl>+d
+  next_background: <ctrl>+k
+  next_character: <ctrl>+l
+  next_emotion: <ctrl>+o
+  pause: <ctrl>+r
+  prev_background: <ctrl>+i
+  prev_character: <ctrl>+j
+  prev_emotion: <ctrl>+u
+  quit: <ctrl>+q
+  start_generate: <ctrl>+enter
+  toggle_listener: <alt>+<ctrl>+p
+win32:
+  character_1: ctrl+1
+  character_2: ctrl+2
+  character_3: ctrl+3
+  character_4: ctrl+4
+  character_5: ctrl+5
+  character_6: ctrl+6
+  delete_cache: ctrl+d
+  next_background: ctrl+alt+k
+  next_character: ctrl+alt+l
+  next_emotion: ctrl+alt+o
+  pause: ctrl+r
+  prev_background: ctrl+alt+i
+  prev_character: ctrl+alt+j
+  prev_emotion: ctrl+alt+u
+  quit: ctrl+q
+  start_generate: ctrl+e
+  toggle_listener: alt+ctrl+p
