@@ -6,3 +6,4 @@
 config/settings.yml
 /build/
 config/keymap.yml
+/target

@@ -1,8 +1,0 @@
-pynput>=1.7.6
-pyyaml
-Pillow>=12.0.0
-pywin32>=311
-psutil>=5.9.0
-openai
-emoji
-BeautifulSoup4
