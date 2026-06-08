@@ -81,9 +81,15 @@ class ManosabaCore(QObject):  # 继承 QObject 以支持信号
             # 功能未启用，直接返回
             self._notify_gui(False, True, "")
             return
-        
-        # 初始化情感分析器
-        self._notify_gui(True, False, "")
+
+        # 如果分析器已可用，直接通知 GUI 即可（不需要重新初始化）
+        if self.sentiment_available:
+            self._notify_gui(True, True, "")
+            self.sentiment_enabled = True
+            return
+
+        # 启动初始化（委托给 toggle_sentiment_matching，它会在后台线程中初始化）
+        self.toggle_sentiment_matching(True)
 
     def toggle_sentiment_matching(self, enabled):
         """切换情感匹配状态"""
@@ -163,8 +169,12 @@ class ManosabaCore(QObject):  # 继承 QObject 以支持信号
             for component in preview_components:
                 if not component.get("enabled", True):
                     continue
-                
+
                 if component.get("type") == "character":
+                    # 使用固定表情/固定角色的图层跳过AI情感选择
+                    if component.get("use_fixed_character", False):
+                        continue
+
                     layer_index = component.get("layer", 1)
                     character_tabs = self.gui.get_character_tab_widgets()
 
