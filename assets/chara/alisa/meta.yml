@@ -1,0 +1,26 @@
+id: alisa
+full_name: 紫藤亚里沙
+emotion_count: 8
+offset: [-180, 2000]
+scale: 0.46
+font: font3
+text:
+  - text: 紫
+    font_color: [235, 75, 60]
+    font_size: 136
+  - text: 藤
+    font_size: 76
+  - text: 亚
+    font_size: 116
+  - text: 里沙
+    font_size: 76
+emo:
+  平静: [3, 6, 7]
+  喜悦: [7]
+  喜爱: [7]
+  惊讶: [5, 8]
+  困惑: [3]
+  无语: [1, 5, 6, 7]
+  悲伤: [2]
+  愤怒: [1]
+  恐惧: [2, 4]

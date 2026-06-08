@@ -274,7 +274,7 @@ default:
   shadow_color: '#000000'
   shadow_offset_x: 0
   shadow_offset_y: 0
-  text_align: top-left
+  text_align: middle-center
   text_color: '#FFFFFF'
   textbox_height: 280
   textbox_width: 1200

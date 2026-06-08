@@ -1,0 +1,26 @@
+id: coco
+full_name: 泽渡可可
+emotion_count: 8
+offset: [-200, 1920]
+scale: 0.45
+font: font3
+text:
+  - text: 泽
+    font_color: [251, 114, 78]
+    font_size: 136
+  - text: 渡
+    font_size: 76
+  - text: 可
+    font_size: 116
+  - text: 可
+    font_size: 76
+emo:
+  平静: [3]
+  喜悦: [3, 7]
+  喜爱: [5]
+  惊讶: [8]
+  困惑: [6]
+  无语: [6]
+  悲伤: [2]
+  愤怒: [1]
+  恐惧: [4]

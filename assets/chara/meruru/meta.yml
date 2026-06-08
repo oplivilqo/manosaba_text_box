@@ -1,0 +1,26 @@
+id: meruru
+full_name: 冰上梅露露
+emotion_count: 16
+offset: [-200, 1900]
+scale: 0.55
+font: font3
+text:
+  - text: 冰
+    font_color: [227, 185, 175]
+    font_size: 136
+  - text: 上
+    font_size: 76
+  - text: 梅
+    font_size: 116
+  - text: 露露
+    font_size: 76
+emo:
+  平静: [13, 14]
+  喜悦: [13, 14]
+  喜爱: [8, 9, 13, 14]
+  惊讶: [15, 16]
+  困惑: [15, 16]
+  无语: [1, 9, 10, 13]
+  悲伤: [3, 4, 6, 5, 11, 12]
+  愤怒: [1, 2]
+  恐惧: [7, 8]

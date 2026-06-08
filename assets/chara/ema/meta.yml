@@ -1,0 +1,26 @@
+id: ema
+full_name: 樱羽艾玛
+emotion_count: 11
+offset: [-180, 1700]
+scale: 0.4
+font: font3
+text:
+  - text: 樱
+    font_color: [253, 145, 175]
+    font_size: 136
+  - text: 羽
+    font_size: 76
+  - text: 艾
+    font_size: 116
+  - text: 玛
+    font_size: 76
+emo:
+  平静: [3]
+  喜悦: [3, 8]
+  喜爱: [6, 11, 10]
+  惊讶: [9]
+  困惑: [7]
+  无语: [4, 7]
+  悲伤: [2, 6, 10, 11]
+  愤怒: [1, 4]
+  恐惧: [2, 5]

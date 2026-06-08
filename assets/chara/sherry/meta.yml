@@ -1,0 +1,24 @@
+id: sherry
+full_name: 橘雪莉
+emotion_count: 8
+offset: [-350, 2100]
+scale: 0.47
+font: font3
+text:
+  - text: 橘
+    font_color: [137, 177, 251]
+    font_size: 136
+  - text: 雪
+    font_size: 116
+  - text: 莉
+    font_size: 76
+emo:
+  平静: [3, 6]
+  喜悦: [3, 7]
+  喜爱: [5, 7]
+  惊讶: [8]
+  困惑: [6]
+  无语: [1, 6]
+  悲伤: [2, 6]
+  愤怒: [1]
+  恐惧: [4]

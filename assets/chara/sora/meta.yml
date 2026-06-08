@@ -1,0 +1,14 @@
+id: sora
+full_name: 新海天
+offset: [-200, 1820]
+scale: 0.56
+emotion_count: 0
+font: font3
+text:
+  - text: 新
+    font_color: [137, 177, 251]
+    font_size: 136
+  - text: 海
+    font_size: 76
+  - text: 天
+    font_size: 116

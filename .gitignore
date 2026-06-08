@@ -10,3 +10,5 @@ config/keymap.yml
 /dll/Image_Processor/x64/
 /dll/Image_Processor/.vs/
 /dll/Image_Processor/Image_Processor/
+.claude/
+CLAUDE.md

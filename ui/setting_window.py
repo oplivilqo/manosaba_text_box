@@ -1,15 +1,21 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'SettingvYBrGH.ui'
+## Form generated from reading UI file 'ui_setting_windowtbKpGg.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.10.0
+## Created by: Qt User Interface Compiler version 6.11.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import (QCoreApplication, QMetaObject, QRect, QSize, Qt)
-from PySide6.QtWidgets import (QCheckBox, QComboBox,
+from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
+    QMetaObject, QObject, QPoint, QRect,
+    QSize, QTime, QUrl, Qt)
+from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
+    QFont, QFontDatabase, QGradient, QIcon,
+    QImage, QKeySequence, QLinearGradient, QPainter,
+    QPalette, QPixmap, QRadialGradient, QTransform)
+from PySide6.QtWidgets import (QAbstractButton, QApplication, QCheckBox, QComboBox,
     QDialogButtonBox, QFormLayout, QFrame, QGridLayout,
     QGroupBox, QHBoxLayout, QLabel, QLineEdit,
     QPushButton, QScrollArea, QSizePolicy, QSlider,
@@ -17,14 +23,14 @@ from PySide6.QtWidgets import (QCheckBox, QComboBox,
     QWidget)
 
 class Ui_SettingWindow(object):
-    def setupUi(self, Form):
-        if not Form.objectName():
-            Form.setObjectName(u"Form")
-        Form.resize(523, 698)
-        Form.setMinimumSize(QSize(0, 150))
-        self.verticalLayout = QVBoxLayout(Form)
+    def setupUi(self, SettingWindow):
+        if not SettingWindow.objectName():
+            SettingWindow.setObjectName(u"SettingWindow")
+        SettingWindow.resize(523, 698)
+        SettingWindow.setMinimumSize(QSize(0, 150))
+        self.verticalLayout = QVBoxLayout(SettingWindow)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.tabWidget = QTabWidget(Form)
+        self.tabWidget = QTabWidget(SettingWindow)
         self.tabWidget.setObjectName(u"tabWidget")
         self.tabWidget.setDocumentMode(False)
         self.tab = QWidget()
@@ -37,7 +43,7 @@ class Ui_SettingWindow(object):
         self.scrollArea.setAlignment(Qt.AlignmentFlag.AlignLeading|Qt.AlignmentFlag.AlignLeft|Qt.AlignmentFlag.AlignTop)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 479, 601))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 477, 596))
         self.verticalLayout_4 = QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.groupBox_pasteCfg = QGroupBox(self.scrollAreaWidgetContents)
@@ -128,14 +134,13 @@ class Ui_SettingWindow(object):
 
         self.label_modelName = QLabel(self.groupBox_EmoMatch)
         self.label_modelName.setObjectName(u"label_modelName")
+        sizePolicy3 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(self.label_modelName.sizePolicy().hasHeightForWidth())
+        self.label_modelName.setSizePolicy(sizePolicy3)
 
-        self.formLayout_2.setWidget(8, QFormLayout.ItemRole.LabelRole, self.label_modelName)
-
-        self.lineEdit_modelName = QLineEdit(self.groupBox_EmoMatch)
-        self.lineEdit_modelName.setObjectName(u"lineEdit_modelName")
-        self.lineEdit_modelName.setMinimumSize(QSize(0, 30))
-
-        self.formLayout_2.setWidget(8, QFormLayout.ItemRole.FieldRole, self.lineEdit_modelName)
+        self.formLayout_2.setWidget(10, QFormLayout.ItemRole.LabelRole, self.label_modelName)
 
         self.label_apiUrl = QLabel(self.groupBox_EmoMatch)
         self.label_apiUrl.setObjectName(u"label_apiUrl")
@@ -160,19 +165,52 @@ class Ui_SettingWindow(object):
         self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.comboBox_ModelSelect = QComboBox(self.widget_2)
         self.comboBox_ModelSelect.setObjectName(u"comboBox_ModelSelect")
+        sizePolicy4 = QSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
+        sizePolicy4.setHorizontalStretch(4)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(self.comboBox_ModelSelect.sizePolicy().hasHeightForWidth())
+        self.comboBox_ModelSelect.setSizePolicy(sizePolicy4)
 
         self.horizontalLayout_2.addWidget(self.comboBox_ModelSelect)
 
         self.pushButton_testConn = QPushButton(self.widget_2)
         self.pushButton_testConn.setObjectName(u"pushButton_testConn")
-        sizePolicy1.setHeightForWidth(self.pushButton_testConn.sizePolicy().hasHeightForWidth())
-        self.pushButton_testConn.setSizePolicy(sizePolicy1)
-        self.pushButton_testConn.setMinimumSize(QSize(0, 30))
+        sizePolicy5 = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        sizePolicy5.setHorizontalStretch(1)
+        sizePolicy5.setVerticalStretch(0)
+        sizePolicy5.setHeightForWidth(self.pushButton_testConn.sizePolicy().hasHeightForWidth())
+        self.pushButton_testConn.setSizePolicy(sizePolicy5)
+        self.pushButton_testConn.setMinimumSize(QSize(0, 0))
 
         self.horizontalLayout_2.addWidget(self.pushButton_testConn)
 
 
         self.formLayout_2.setWidget(3, QFormLayout.ItemRole.FieldRole, self.widget_2)
+
+        self.widget_4 = QWidget(self.groupBox_EmoMatch)
+        self.widget_4.setObjectName(u"widget_4")
+        self.horizontalLayout_4 = QHBoxLayout(self.widget_4)
+        self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
+        self.horizontalLayout_4.setContentsMargins(0, 0, 0, 0)
+        self.comboBox_modelName = QComboBox(self.widget_4)
+        self.comboBox_modelName.setObjectName(u"comboBox_modelName")
+        sizePolicy4.setHeightForWidth(self.comboBox_modelName.sizePolicy().hasHeightForWidth())
+        self.comboBox_modelName.setSizePolicy(sizePolicy4)
+
+        self.horizontalLayout_4.addWidget(self.comboBox_modelName)
+
+        self.pushButton_query = QPushButton(self.widget_4)
+        self.pushButton_query.setObjectName(u"pushButton_query")
+        sizePolicy6 = QSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+        sizePolicy6.setHorizontalStretch(1)
+        sizePolicy6.setVerticalStretch(0)
+        sizePolicy6.setHeightForWidth(self.pushButton_query.sizePolicy().hasHeightForWidth())
+        self.pushButton_query.setSizePolicy(sizePolicy6)
+
+        self.horizontalLayout_4.addWidget(self.pushButton_query)
+
+
+        self.formLayout_2.setWidget(10, QFormLayout.ItemRole.FieldRole, self.widget_4)
 
 
         self.verticalLayout_4.addWidget(self.groupBox_EmoMatch)
@@ -260,7 +298,7 @@ class Ui_SettingWindow(object):
         self.scrollArea_2.setWidgetResizable(True)
         self.scrollAreaWidgetContents_2 = QWidget()
         self.scrollAreaWidgetContents_2.setObjectName(u"scrollAreaWidgetContents_2")
-        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 467, 702))
+        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 465, 712))
         self.verticalLayout_8 = QVBoxLayout(self.scrollAreaWidgetContents_2)
         self.verticalLayout_8.setObjectName(u"verticalLayout_8")
         self.groupBox_ctrlKeys = QGroupBox(self.scrollAreaWidgetContents_2)
@@ -514,71 +552,69 @@ class Ui_SettingWindow(object):
 
         self.verticalLayout.addWidget(self.tabWidget)
 
-        self.buttonBox = QDialogButtonBox(Form)
+        self.buttonBox = QDialogButtonBox(SettingWindow)
         self.buttonBox.setObjectName(u"buttonBox")
         self.buttonBox.setStandardButtons(QDialogButtonBox.StandardButton.Apply|QDialogButtonBox.StandardButton.Cancel|QDialogButtonBox.StandardButton.Save)
-        self.buttonBox.button(QDialogButtonBox.Save).setText("保存")
-        self.buttonBox.button(QDialogButtonBox.Apply).setText("应用")
-        self.buttonBox.button(QDialogButtonBox.Cancel).setText("取消")
 
         self.verticalLayout.addWidget(self.buttonBox)
 
 
-        self.retranslateUi(Form)
+        self.retranslateUi(SettingWindow)
 
         self.tabWidget.setCurrentIndex(0)
 
 
-        QMetaObject.connectSlotsByName(Form)
+        QMetaObject.connectSlotsByName(SettingWindow)
     # setupUi
 
-    def retranslateUi(self, Form):
-        Form.setWindowTitle(QCoreApplication.translate("Form", u"\u8bbe\u7f6e", None))
-        self.groupBox_pasteCfg.setTitle(QCoreApplication.translate("Form", u"\u526a\u5207\u8bbe\u7f6e", None))
-        self.label_pasteModeSelect.setText(QCoreApplication.translate("Form", u"\u526a\u5207\u6a21\u5f0f", None))
-        self.label_info1.setText(QCoreApplication.translate("Form", u"\u5168\u9009\u526a\u5207\uff1a   \u4f7f\u7528Ctrl+A\u4ee5\u53caCtrl+X\u526a\u5207\u8d70\u6240\u6709\u5185\u5bb9", None))
-        self.label_info2.setText(QCoreApplication.translate("Form", u"\u5355\u884c\u526a\u5207\uff1a   \u4f7f\u7528End\u4ee5\u53caShift+Home\u9009\u4e2d\u5e76\u526a\u5207\u8d70\u5f53\u524d\u884c", None))
-        self.label_info3.setText(QCoreApplication.translate("Form", u"\u76f4\u63a5\u526a\u5207\uff1a   \u526a\u5207\u8d70\u5f53\u524d\u624b\u52a8\u9009\u62e9\u7684\u5185\u5bb9", None))
-        self.groupBox_EmoMatch.setTitle(QCoreApplication.translate("Form", u"\u60c5\u611f\u5339\u914d", None))
-        self.label_apiKey.setText(QCoreApplication.translate("Form", u"API Key", None))
-        self.label_modelName.setText(QCoreApplication.translate("Form", u"\u6a21\u578b\u540d\u79f0", None))
-        self.label_apiUrl.setText(QCoreApplication.translate("Form", u"API\u5730\u5740", None))
-        self.label_modelSelect.setText(QCoreApplication.translate("Form", u"\u6a21\u578b\u9009\u62e9", None))
-        self.pushButton_testConn.setText(QCoreApplication.translate("Form", u"\u6d4b\u8bd5\u8fde\u63a5", None))
-        self.groupBox_ImgCompression.setTitle(QCoreApplication.translate("Form", u"\u56fe\u7247\u538b\u7f29", None))
-        self.checkBox_enableImgCompression.setText(QCoreApplication.translate("Form", u"\u542f\u7528\u56fe\u50cf\u538b\u7f29", None))
-        self.label_pixelReductionProps.setText(QCoreApplication.translate("Form", u"\u50cf\u7d20\u524a\u51cf\u6bd4\u4f8b", None))
-        self.label_ReductRate.setText(QCoreApplication.translate("Form", u"40%", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QCoreApplication.translate("Form", u"\u5e38\u89c4\u8bbe\u7f6e", None))
-        self.label_info.setText(QCoreApplication.translate("Form", u"\u6bcf\u884c\u4e00\u4e2a\u8fdb\u7a0b\u540d", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QCoreApplication.translate("Form", u"\u8fdb\u7a0b\u767d\u540d\u5355", None))
-        self.groupBox_ctrlKeys.setTitle(QCoreApplication.translate("Form", u"\u63a7\u5236\u6309\u952e", None))
-        self.label_geneTrigger.setText(QCoreApplication.translate("Form", u"\u89e6\u53d1\u56fe\u7247\u751f\u6210", None))
-        self.pushButton_modifiy1.setText(QCoreApplication.translate("Form", u"\u4fee\u6539", None))
-        self.label_listenCtrl.setText(QCoreApplication.translate("Form", u"\u542f\u505c\u6309\u952e\u76d1\u542c", None))
-        self.pushButton_modify2.setText(QCoreApplication.translate("Form", u"\u4fee\u6539", None))
-        self.groupBox_charaSwitch.setTitle(QCoreApplication.translate("Form", u"\u89d2\u8272\u5207\u6362", None))
-        self.label_previChara.setText(QCoreApplication.translate("Form", u"\u5411\u524d\u5207\u6362\u89d2\u8272", None))
-        self.pushButton_modify3.setText(QCoreApplication.translate("Form", u"\u4fee\u6539", None))
-        self.label_nextChara.setText(QCoreApplication.translate("Form", u"\u5411\u540e\u5207\u6362\u89d2\u8272", None))
-        self.pushButton_modify4.setText(QCoreApplication.translate("Form", u"\u4fee\u6539", None))
-        self.groupBox_emoSwitch.setTitle(QCoreApplication.translate("Form", u"\u8868\u60c5\u5207\u6362", None))
-        self.label_previEmo.setText(QCoreApplication.translate("Form", u"\u5411\u524d\u5207\u6362\u8868\u60c5", None))
-        self.pushButton_modify5.setText(QCoreApplication.translate("Form", u"\u4fee\u6539", None))
-        self.label_nextEmo.setText(QCoreApplication.translate("Form", u"\u5411\u540e\u5207\u6362\u8868\u60c5", None))
-        self.pushButton_modify6.setText(QCoreApplication.translate("Form", u"\u4fee\u6539", None))
-        self.groupBox_bgSwitch.setTitle(QCoreApplication.translate("Form", u"\u80cc\u666f\u5207\u6362", None))
-        self.label_previBg.setText(QCoreApplication.translate("Form", u"\u5411\u524d\u5207\u6362\u80cc\u666f", None))
-        self.pushButton_modify8.setText(QCoreApplication.translate("Form", u"\u4fee\u6539", None))
-        self.pushButton_modify7.setText(QCoreApplication.translate("Form", u"\u4fee\u6539", None))
-        self.label_nextBg.setText(QCoreApplication.translate("Form", u"\u5411\u540e\u5207\u6362\u80cc\u666f", None))
-        self.groupBox_quickChara.setTitle(QCoreApplication.translate("Form", u"\u89d2\u8272\u5feb\u901f\u5207\u6362", None))
-        self.label_chara1.setText(QCoreApplication.translate("Form", u"\u89d2\u82721", None))
-        self.label_chara2.setText(QCoreApplication.translate("Form", u"\u89d2\u82722", None))
-        self.label_chara3.setText(QCoreApplication.translate("Form", u"\u89d2\u82723", None))
-        self.label_chara6.setText(QCoreApplication.translate("Form", u"\u89d2\u82726", None))
-        self.label_chara5.setText(QCoreApplication.translate("Form", u"\u89d2\u82725", None))
-        self.label_chara4.setText(QCoreApplication.translate("Form", u"\u89d2\u82724", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), QCoreApplication.translate("Form", u"\u5feb\u6377\u952e\u7f16\u8f91", None))
+    def retranslateUi(self, SettingWindow):
+        SettingWindow.setWindowTitle(QCoreApplication.translate("SettingWindow", u"\u8bbe\u7f6e", None))
+        self.groupBox_pasteCfg.setTitle(QCoreApplication.translate("SettingWindow", u"\u526a\u5207\u8bbe\u7f6e", None))
+        self.label_pasteModeSelect.setText(QCoreApplication.translate("SettingWindow", u"\u526a\u5207\u6a21\u5f0f", None))
+        self.label_info1.setText(QCoreApplication.translate("SettingWindow", u"\u5168\u9009\u526a\u5207\uff1a   \u4f7f\u7528Ctrl+A\u4ee5\u53caCtrl+X\u526a\u5207\u8d70\u6240\u6709\u5185\u5bb9", None))
+        self.label_info2.setText(QCoreApplication.translate("SettingWindow", u"\u5355\u884c\u526a\u5207\uff1a   \u4f7f\u7528End\u4ee5\u53caShift+Home\u9009\u4e2d\u5e76\u526a\u5207\u8d70\u5f53\u524d\u884c", None))
+        self.label_info3.setText(QCoreApplication.translate("SettingWindow", u"\u76f4\u63a5\u526a\u5207\uff1a   \u526a\u5207\u8d70\u5f53\u524d\u624b\u52a8\u9009\u62e9\u7684\u5185\u5bb9", None))
+        self.groupBox_EmoMatch.setTitle(QCoreApplication.translate("SettingWindow", u"\u60c5\u611f\u5339\u914d", None))
+        self.label_apiKey.setText(QCoreApplication.translate("SettingWindow", u"API Key", None))
+        self.label_modelName.setText(QCoreApplication.translate("SettingWindow", u"\u6a21\u578b\u540d\u79f0", None))
+        self.label_apiUrl.setText(QCoreApplication.translate("SettingWindow", u"API\u5730\u5740", None))
+        self.label_modelSelect.setText(QCoreApplication.translate("SettingWindow", u"\u6a21\u578b\u9009\u62e9", None))
+        self.pushButton_testConn.setText(QCoreApplication.translate("SettingWindow", u"\u6d4b\u8bd5\u8fde\u63a5", None))
+        self.pushButton_query.setText(QCoreApplication.translate("SettingWindow", u"\u67e5\u8be2", None))
+        self.groupBox_ImgCompression.setTitle(QCoreApplication.translate("SettingWindow", u"\u56fe\u7247\u538b\u7f29", None))
+        self.checkBox_enableImgCompression.setText(QCoreApplication.translate("SettingWindow", u"\u542f\u7528\u56fe\u50cf\u538b\u7f29", None))
+        self.label_pixelReductionProps.setText(QCoreApplication.translate("SettingWindow", u"\u50cf\u7d20\u524a\u51cf\u6bd4\u4f8b", None))
+        self.label_ReductRate.setText(QCoreApplication.translate("SettingWindow", u"40%", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), QCoreApplication.translate("SettingWindow", u"\u5e38\u89c4\u8bbe\u7f6e", None))
+        self.label_info.setText(QCoreApplication.translate("SettingWindow", u"\u6bcf\u884c\u4e00\u4e2a\u8fdb\u7a0b\u540d", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), QCoreApplication.translate("SettingWindow", u"\u8fdb\u7a0b\u767d\u540d\u5355", None))
+        self.groupBox_ctrlKeys.setTitle(QCoreApplication.translate("SettingWindow", u"\u63a7\u5236\u6309\u952e", None))
+        self.label_geneTrigger.setText(QCoreApplication.translate("SettingWindow", u"\u89e6\u53d1\u56fe\u7247\u751f\u6210", None))
+        self.pushButton_modifiy1.setText(QCoreApplication.translate("SettingWindow", u"\u4fee\u6539", None))
+        self.label_listenCtrl.setText(QCoreApplication.translate("SettingWindow", u"\u542f\u505c\u6309\u952e\u76d1\u542c", None))
+        self.pushButton_modify2.setText(QCoreApplication.translate("SettingWindow", u"\u4fee\u6539", None))
+        self.groupBox_charaSwitch.setTitle(QCoreApplication.translate("SettingWindow", u"\u89d2\u8272\u5207\u6362", None))
+        self.label_previChara.setText(QCoreApplication.translate("SettingWindow", u"\u5411\u524d\u5207\u6362\u89d2\u8272", None))
+        self.pushButton_modify3.setText(QCoreApplication.translate("SettingWindow", u"\u4fee\u6539", None))
+        self.label_nextChara.setText(QCoreApplication.translate("SettingWindow", u"\u5411\u540e\u5207\u6362\u89d2\u8272", None))
+        self.pushButton_modify4.setText(QCoreApplication.translate("SettingWindow", u"\u4fee\u6539", None))
+        self.groupBox_emoSwitch.setTitle(QCoreApplication.translate("SettingWindow", u"\u8868\u60c5\u5207\u6362", None))
+        self.label_previEmo.setText(QCoreApplication.translate("SettingWindow", u"\u5411\u524d\u5207\u6362\u8868\u60c5", None))
+        self.pushButton_modify5.setText(QCoreApplication.translate("SettingWindow", u"\u4fee\u6539", None))
+        self.label_nextEmo.setText(QCoreApplication.translate("SettingWindow", u"\u5411\u540e\u5207\u6362\u8868\u60c5", None))
+        self.pushButton_modify6.setText(QCoreApplication.translate("SettingWindow", u"\u4fee\u6539", None))
+        self.groupBox_bgSwitch.setTitle(QCoreApplication.translate("SettingWindow", u"\u80cc\u666f\u5207\u6362", None))
+        self.label_previBg.setText(QCoreApplication.translate("SettingWindow", u"\u5411\u524d\u5207\u6362\u80cc\u666f", None))
+        self.pushButton_modify8.setText(QCoreApplication.translate("SettingWindow", u"\u4fee\u6539", None))
+        self.pushButton_modify7.setText(QCoreApplication.translate("SettingWindow", u"\u4fee\u6539", None))
+        self.label_nextBg.setText(QCoreApplication.translate("SettingWindow", u"\u5411\u540e\u5207\u6362\u80cc\u666f", None))
+        self.groupBox_quickChara.setTitle(QCoreApplication.translate("SettingWindow", u"\u89d2\u8272\u5feb\u901f\u5207\u6362", None))
+        self.label_chara1.setText(QCoreApplication.translate("SettingWindow", u"\u89d2\u82721", None))
+        self.label_chara2.setText(QCoreApplication.translate("SettingWindow", u"\u89d2\u82722", None))
+        self.label_chara3.setText(QCoreApplication.translate("SettingWindow", u"\u89d2\u82723", None))
+        self.label_chara6.setText(QCoreApplication.translate("SettingWindow", u"\u89d2\u82726", None))
+        self.label_chara5.setText(QCoreApplication.translate("SettingWindow", u"\u89d2\u82725", None))
+        self.label_chara4.setText(QCoreApplication.translate("SettingWindow", u"\u89d2\u82724", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), QCoreApplication.translate("SettingWindow", u"\u5feb\u6377\u952e\u7f16\u8f91", None))
     # retranslateUi
 

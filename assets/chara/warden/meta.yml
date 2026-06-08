@@ -1,0 +1,14 @@
+id: warden
+full_name: 典狱长
+emotion_count: 1
+offset: [0, 2000]
+scale: 0.5
+font: font3
+text:
+  - text: 典
+    font_color: [251, 114, 78]
+    font_size: 136
+  - text: 狱
+    font_size: 76
+  - text: 长
+    font_size: 116

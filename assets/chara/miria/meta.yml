@@ -1,0 +1,26 @@
+id: miria
+full_name: 佐伯米莉亚
+emotion_count: 8
+offset: [-300, 2200]
+scale: 0.49
+font: font3
+text:
+  - text: 佐
+    font_color: [235, 207, 139]
+    font_size: 136
+  - text: 伯
+    font_size: 76
+  - text: 米
+    font_size: 116
+  - text: 莉亚
+    font_size: 76
+emo:
+  平静: [7]
+  喜悦: [7]
+  喜爱: [5, 7]
+  惊讶: [3, 8]
+  困惑: [6]
+  无语: [1, 6, 7]
+  悲伤: [2, 6]
+  愤怒: [1]
+  恐惧: [4, 8]

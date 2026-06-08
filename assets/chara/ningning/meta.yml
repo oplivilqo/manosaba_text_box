@@ -1,0 +1,14 @@
+id: ningning
+full_name: 绫地宁宁
+offset: [-400, 2220]
+scale: 0.82
+emotion_count: 0
+font: font3
+text:
+  - text: 绫
+    font_color: [137, 177, 251]
+    font_size: 136
+  - text: 地
+    font_size: 76
+  - text: 宁宁
+    font_size: 116

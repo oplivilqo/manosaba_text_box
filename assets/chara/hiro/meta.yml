@@ -1,0 +1,16 @@
+id: hiro
+full_name: 二阶堂希罗
+emotion_count: 0
+offset: [-350, 1750]
+scale: 0.5
+font: font3
+text:
+  - text: 二
+    font_color: [239, 79, 84]
+    font_size: 136
+  - text: 阶堂
+    font_size: 76
+  - text: 希
+    font_size: 116
+  - text: 罗
+    font_size: 76

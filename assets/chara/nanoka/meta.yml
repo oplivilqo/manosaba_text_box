@@ -1,0 +1,26 @@
+id: nanoka
+full_name: 黑部奈叶香
+emotion_count: 8
+offset: [-450, 1975]
+scale: 0.56
+font: font3
+text:
+  - text: 黑
+    font_color: [131, 143, 147]
+    font_size: 136
+  - text: 部
+    font_size: 76
+  - text: 奈
+    font_size: 116
+  - text: 叶香
+    font_size: 76
+emo:
+  平静: [3, 7]
+  喜悦: [3, 7]
+  喜爱: [5, 7]
+  惊讶: [3, 8]
+  困惑: [3, 6]
+  无语: [1]
+  悲伤: [2, 6]
+  愤怒: [1]
+  恐惧: [4]

@@ -2,6 +2,7 @@
 from PySide6.QtWidgets import QDialog, QDialogButtonBox
 from PySide6.QtCore import Signal, QThread, QTimer
 import threading
+import requests
 from pynput import keyboard
 
 from ui.setting_window import Ui_SettingWindow
@@ -143,7 +144,7 @@ class SettingWindow(QDialog):
         
         # 初始化UI
         self._init_ui()
-        
+
         # 连接信号槽
         self._connect_signals()
     
@@ -254,21 +255,86 @@ class SettingWindow(QDialog):
                         combo.setCurrentIndex(index)
                 
                 self.character_combos[f"character_{i}"] = combo
-    
+
+    def _query_models(self):
+        """查询 API 可用模型列表并填充下拉框"""
+        url = self.ui.lineEdit_apiUrl.text().strip().rstrip("/") + "/models"
+
+        self.ui.pushButton_query.setEnabled(False)
+        self.ui.pushButton_query.setText("…")
+        self.ui.comboBox_modelName.setEnabled(False)
+
+        def query():
+            try:
+                resp = requests.get(url, timeout=8)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    from utils.sentiment_analyzer import _extract_model_list
+                    models = _extract_model_list(data)
+                    self._on_models_queried(models)
+                else:
+                    self._on_models_queried(None, f"HTTP {resp.status_code}")
+            except requests.Timeout:
+                self._on_models_queried(None, "查询超时")
+            except requests.ConnectionError:
+                self._on_models_queried(None, "无法连接")
+            except Exception as e:
+                self._on_models_queried(None, str(e))
+
+        thread = threading.Thread(target=query, daemon=True)
+        thread.start()
+
+    def _on_models_queried(self, models, error=None):
+        """模型查询结果回调（在主线程）"""
+        self.ui.pushButton_query.setEnabled(True)
+        self.ui.pushButton_query.setText("查询")
+        self.ui.comboBox_modelName.setEnabled(True)
+
+        if models is None or error:
+            self.ui.comboBox_modelName.setToolTip(f"查询失败: {error}")
+            return
+
+        if not models:
+            self.ui.comboBox_modelName.setToolTip("服务未返回可用模型")
+            return
+
+        current = self.ui.comboBox_modelName.currentText()
+
+        self.ui.comboBox_modelName.blockSignals(True)
+        self.ui.comboBox_modelName.clear()
+        self.ui.comboBox_modelName.addItems(models)
+
+        if current:
+            idx = self.ui.comboBox_modelName.findText(current)
+            if idx >= 0:
+                self.ui.comboBox_modelName.setCurrentIndex(idx)
+            else:
+                self.ui.comboBox_modelName.setCurrentText(current)
+        self.ui.comboBox_modelName.blockSignals(False)
+
+        self.ui.comboBox_modelName.setToolTip(f"已加载 {len(models)} 个模型")
+        self.settings_changed = True
+
     def _update_model_parameters(self, model_name):
         """更新模型参数显示"""
         if model_name not in CONFIGS.ai_models:
             return
-        
+
         model_config = CONFIGS.ai_models[model_name]
         sentiment_settings = CONFIGS.gui_settings.get("sentiment_matching", {})
         model_settings = sentiment_settings.get("model_configs", {}).get(model_name, {})
-        
+
         # 设置参数
         self.ui.lineEdit_apiUrl.setText(model_settings.get("base_url", model_config.get("base_url", "")))
         self.ui.lineEdit_apiKey.setText(model_settings.get("api_key", model_config.get("api_key", "")))
-        self.ui.lineEdit_modelName.setText(model_settings.get("model", model_config.get("model", "")))
-    
+        # 允许手动输入，把当前模型名加入下拉列表
+        self.ui.comboBox_modelName.setEditable(True)
+        self.ui.comboBox_modelName.setInsertPolicy(self.ui.comboBox_modelName.InsertPolicy.NoInsert)
+        current_model = model_settings.get("model", model_config.get("model", ""))
+        if current_model and self.ui.comboBox_modelName.findText(current_model) < 0:
+            self.ui.comboBox_modelName.addItem(current_model)
+        self.ui.comboBox_modelName.setCurrentText(current_model)
+
     def _connect_signals(self):
         """连接信号槽"""
         # 剪切模式
@@ -280,7 +346,8 @@ class SettingWindow(QDialog):
             self.ui.pushButton_testConn.clicked.connect(self._test_ai_connection)
             self.ui.lineEdit_apiUrl.textChanged.connect(lambda: setattr(self, 'settings_changed', True))
             self.ui.lineEdit_apiKey.textChanged.connect(lambda: setattr(self, 'settings_changed', True))
-            self.ui.lineEdit_modelName.textChanged.connect(lambda: setattr(self, 'settings_changed', True))
+            self.ui.comboBox_modelName.currentTextChanged.connect(lambda: setattr(self, 'settings_changed', True))
+            self.ui.pushButton_query.clicked.connect(self._query_models)
         
         # 图像压缩
         self.ui.checkBox_enableImgCompression.stateChanged.connect(lambda: setattr(self, 'settings_changed', True))
@@ -364,7 +431,7 @@ class SettingWindow(QDialog):
         config = {
             "base_url": self.ui.lineEdit_apiUrl.text(),
             "api_key": self.ui.lineEdit_apiKey.text(),
-            "model": self.ui.lineEdit_modelName.text()
+            "model": self.ui.comboBox_modelName.currentText()
         }
         
         # 禁用按钮
@@ -433,7 +500,7 @@ class SettingWindow(QDialog):
         current_model_config = {
             "base_url": self.ui.lineEdit_apiUrl.text(),
             "api_key": self.ui.lineEdit_apiKey.text(),
-            "model": self.ui.lineEdit_modelName.text()
+            "model": self.ui.comboBox_modelName.currentText()
         }
         
         existing_model_configs[model_name] = current_model_config

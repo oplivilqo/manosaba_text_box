@@ -67,7 +67,8 @@ class ConfigLoader:
         self.version = self.version_info["version"] # 需要存在version.yml文件
 
         # 配置加载
-        self.mahoshojo = self._load_config("chara_meta")
+        from utils.chara_loader import load_all_characters
+        self.mahoshojo = load_all_characters()
         self.keymap = self._load_config("keymap")
         self.process_whitelist = self._load_config("process_whitelist")
         self.gui_settings = self._load_config("settings")
@@ -205,19 +206,29 @@ class ConfigLoader:
             return True
         return False
 
+    @staticmethod
+    def _deep_merge(base: dict, override: dict) -> dict:
+        """递归合并两个字典，override 中的值优先但不会删除 base 中的键"""
+        result = base.copy()
+        for key, value in override.items():
+            if key in result and isinstance(result[key], dict) and isinstance(value, dict):
+                result[key] = ConfigLoader._deep_merge(result[key], value)
+            else:
+                result[key] = value
+        return result
+
     def _load_config(self, config_type: str, *args) -> Any:
         """
         通用配置加载函数
         
         Args:
-            config_type: 配置类型，支持: 'chara_meta', 
-                        'keymap', 'process_whitelist', 'settings'
+            config_type: 配置类型，支持: 'keymap', 'process_whitelist', 'settings'
             *args: 额外参数，如平台类型或配置键名
         
         Returns:
             配置数据
         """
-        config_list = ["chara_meta", "keymap", "process_whitelist", "settings"]
+        config_list = ["keymap", "process_whitelist", "settings"]
         if config_type not in config_list:
             raise ValueError(f"不支持的配置类型: {config_type}")
         
@@ -236,9 +247,8 @@ class ConfigLoader:
             # 处理settings配置，确保所有字段都存在
             default_settings = self._get_default_setting("settings")
             if config:
-                # 递归合并默认值和文件配置
-                default_settings |= config
-                config = default_settings
+                # 深度合并：default 提供缺失键，文件值优先
+                config = self._deep_merge(default_settings, config)
             else:
                 config = default_settings
                 self.gui_settings = config
@@ -286,6 +296,11 @@ class ConfigLoader:
                             "api_key": '',
                             "base_url": "http://localhost:11434/v1/",
                             "model": "OmniDimen"
+                        },
+                        "lmstudio": {
+                            "api_key": '',
+                            "base_url": "http://localhost:1234/v1/",
+                            "model": ""
                         }
                     }
                 }
@@ -372,8 +387,9 @@ class ConfigLoader:
         available_models = {}
         model_descriptions = {
             "ollama": "本地运行的Ollama服务",
-            "deepseek": "DeepSeek在线API", 
-            "chatGPT": "OpenAI ChatGPT服务"
+            "deepseek": "DeepSeek在线API",
+            "chatGPT": "OpenAI ChatGPT服务",
+            "lmstudio": "本地运行的LM Studio服务"
         }
         
         for model_type, model_config in model_configs.items():
